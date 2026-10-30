@@ -4,354 +4,734 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="theme-color" content="#3d2b1f" />
-<title>Clarence Ct Build Tracker</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Clarence Ct" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+<meta name="description" content="Clarence Ct home-build tracker — lot 28630, ROFR 28642, U13 plan." />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon.png" />
+<title>Clarence Ct Build</title>
 <style>
+:root {
+  --bg: #f2f2f7;
+  --bg-elevated: #ffffff;
+  --grouped: #ffffff;
+  --ink: #000000;
+  --label: #000000;
+  --secondary: #3c3c43;
+  --secondary-a: rgba(60,60,67,.6);
+  --tertiary: rgba(60,60,67,.3);
+  --separator: rgba(60,60,67,.29);
+  --fill: rgba(120,120,128,.16);
+  --fill2: rgba(120,120,128,.08);
+  --accent: #007aff;
+  --accent-press: #0066d6;
+  --good: #34c759;
+  --warn: #ff9500;
+  --bad: #ff3b30;
+  --nav-h: 52px;
+  --large-title: 34px;
+  --tab-h: 49px;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --radius: 10px;
+  --radius-lg: 12px;
+  --hair: 0.5px;
+  --blur: saturate(180%) blur(20px);
+  --shadow-sheet: 0 -8px 40px rgba(0,0,0,.18);
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
   :root {
-    --bg: #f4efe6;
-    --bg2: #ebe3d5;
-    --card: #fffcf7;
-    --ink: #2c2118;
-    --muted: #6b5a4a;
-    --accent: #8b5e3c;
-    --accent2: #c4a574;
-    --good: #3d6b4f;
-    --warn: #9a5b1f;
-    --bad: #8b3a2f;
-    --line: #d9cbb8;
-    --shadow: 0 8px 24px rgba(44,33,24,.08);
-    --radius: 14px;
-    --safe-b: env(safe-area-inset-bottom, 0px);
+    --bg: #000000;
+    --bg-elevated: #1c1c1e;
+    --grouped: #1c1c1e;
+    --ink: #ffffff;
+    --label: #ffffff;
+    --secondary: #ebebf5;
+    --secondary-a: rgba(235,235,245,.6);
+    --tertiary: rgba(235,235,245,.3);
+    --separator: rgba(84,84,88,.65);
+    --fill: rgba(120,120,128,.36);
+    --fill2: rgba(120,120,128,.24);
+    --accent: #0a84ff;
+    --accent-press: #409cff;
+    --good: #30d158;
+    --warn: #ff9f0a;
+    --bad: #ff453a;
   }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
-    font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
-  body { padding-bottom: calc(72px + var(--safe-b)); }
-  header.app {
-    position: sticky; top: 0; z-index: 40;
-    background: linear-gradient(180deg, #3d2b1f 0%, #4a3426 100%);
-    color: #f8f0e4; padding: 14px 16px 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,.18);
-  }
-  header.app h1 { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: .02em; }
-  header.app .sub { margin: 4px 0 0; font-size: .78rem; opacity: .85; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 14px 14px 28px; }
-  .card {
-    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-    box-shadow: var(--shadow); padding: 14px 14px 16px; margin-bottom: 14px;
-  }
-  .card h2 { margin: 0 0 10px; font-size: 1.05rem; color: var(--accent); }
-  .card h3 { margin: 14px 0 8px; font-size: .95rem; }
-  .muted { color: var(--muted); font-size: .85rem; }
-  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
-  label.field { display: flex; flex-direction: column; gap: 4px; font-size: .78rem; color: var(--muted); flex: 1; min-width: 140px; }
-  input, select, textarea {
-    font: inherit; color: var(--ink); background: #fff; border: 1px solid var(--line);
-    border-radius: 10px; padding: 10px 12px; width: 100%;
-  }
-  textarea { min-height: 80px; resize: vertical; }
-  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent2); border-color: var(--accent); }
-  button, .btn {
-    appearance: none; border: none; cursor: pointer; font: inherit; font-weight: 600;
-    border-radius: 10px; padding: 10px 14px; background: var(--accent); color: #fff;
-  }
-  button.ghost, .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
-  button.danger { background: var(--bad); }
-  button.sm { padding: 7px 10px; font-size: .8rem; }
-  .pill {
-    display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
-    font-size: .75rem; font-weight: 600; background: var(--bg2); color: var(--muted);
-  }
-  .pill.done { background: #dceadf; color: var(--good); }
-  .pill.active { background: #f3e4c8; color: var(--warn); }
-  .pill.todo { background: #eee8df; color: var(--muted); }
-  .pill.blocked { background: #f3d9d4; color: var(--bad); }
-  .dash {
-    display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;
-  }
-  @media (max-width: 640px) { .dash { grid-template-columns: 1fr; } }
-  .progress-ring-wrap { display: flex; align-items: center; gap: 14px; }
-  .progress-ring { width: 88px; height: 88px; position: relative; }
-  .progress-ring svg { transform: rotate(-90deg); }
-  .progress-ring .pct {
-    position: absolute; inset: 0; display: grid; place-items: center;
-    font-size: 1.25rem; font-weight: 800; color: var(--accent);
-  }
-  .stat { font-size: .85rem; }
-  .stat strong { display: block; font-size: 1.1rem; color: var(--ink); }
-  .tabs {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-    display: grid; grid-template-columns: repeat(5, 1fr);
-    background: #fffdf9; border-top: 1px solid var(--line);
-    padding-bottom: var(--safe-b); box-shadow: 0 -6px 20px rgba(0,0,0,.06);
-  }
-  .tabs button {
-    background: transparent; color: var(--muted); border-radius: 0; padding: 10px 4px 8px;
-    font-size: .68rem; font-weight: 600; display: flex; flex-direction: column; gap: 2px; align-items: center;
-  }
-  .tabs button.active { color: var(--accent); }
-  .tabs .ico { font-size: 1.15rem; line-height: 1; }
-  .panel { display: none; }
-  .panel.active { display: block; }
-  .plan-img, .lot-img {
-    width: 100%; border-radius: 12px; border: 1px solid var(--line); background: #fff;
-    display: block; cursor: zoom-in;
-  }
-  .lightbox {
-    display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.88);
-    align-items: center; justify-content: center; padding: 12px;
-  }
-  .lightbox.open { display: flex; }
-  .lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
-  .list { list-style: none; margin: 0; padding: 0; }
-  .list li {
-    background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px;
-    margin-bottom: 8px;
-  }
-  .list li .top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
-  .list li .title { font-weight: 700; font-size: .95rem; }
-  .list li .meta { font-size: .78rem; color: var(--muted); margin-top: 4px; }
-  .money { font-variant-numeric: tabular-nums; }
-  .caution {
-    background: #f8ebe3; border: 1px solid #e2b89a; color: #7a3d1c;
-    border-radius: 12px; padding: 12px; font-size: .85rem; margin: 10px 0;
-  }
-  .caution.hidden { display: none; }
-  .grade-board {
-    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px;
-  }
-  @media (max-width: 700px) { .grade-board { grid-template-columns: 1fr 1fr; } }
-  .grade-card {
-    border: 2px solid var(--line); border-radius: 12px; padding: 8px; background: #fff;
-    cursor: pointer; text-align: center; transition: .15s ease;
-  }
-  .grade-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,94,60,.18); background: #fff8ef; }
-  .grade-card .g { font-weight: 800; font-size: 1rem; color: var(--accent); }
-  .grade-card .note { font-size: .68rem; color: var(--muted); margin-top: 4px; line-height: 1.25; }
-  .grade-card svg { width: 100%; height: 54px; display: block; margin: 4px 0; }
-  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-  .idea-board { display: grid; gap: 8px; }
-  .idea {
-    border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: #fff;
-  }
-  .idea .when { font-size: .72rem; color: var(--muted); }
-  .empty { text-align: center; color: var(--muted); padding: 18px; font-size: .9rem; }
-  .drag-handle { cursor: grab; color: var(--muted); user-select: none; padding: 0 4px; }
-  .step-edit { display: grid; gap: 8px; margin-top: 8px; }
-  .step-edit.hidden { display: none; }
-  footer.tiny { text-align: center; color: var(--muted); font-size: .72rem; padding: 8px; }
-  .budget-card .cap-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 12px; }
-  .budget-bar {
-    height: 14px; border-radius: 999px; background: #e8dfd0; overflow: hidden;
-    position: relative; margin: 8px 0 4px;
-  }
-  .budget-bar > span {
-    display: block; height: 100%; border-radius: 999px; background: var(--good);
-    transition: width .25s ease;
-  }
-  .budget-bar.over > span { background: var(--bad); }
-  .budget-bar.warn > span { background: var(--warn); }
-  .budget-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;
-  }
-  @media (max-width: 640px) { .budget-grid { grid-template-columns: 1fr 1fr; } }
-  .budget-grid .stat strong { font-size: 1.05rem; }
-  .toggle-row {
-    display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted);
-    margin-top: 8px;
-  }
-  .toggle-row input { width: auto; }
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { height: 100%; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg); color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 17px; line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+body {
+  padding-top: calc(var(--safe-t) + var(--nav-h));
+  padding-bottom: calc(var(--tab-h) + var(--safe-b) + 8px);
+  min-height: 100%;
+}
+body.sheet-open { overflow: hidden; }
+
+/* —— Large-title collapsing nav —— */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+  padding-top: var(--safe-t);
+  background: rgba(242,242,247,.72);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border-bottom: var(--hair) solid transparent;
+  transition: border-color .15s ease, background .15s ease;
+}
+@media (prefers-color-scheme: dark) {
+  .nav { background: rgba(0,0,0,.65); }
+}
+.nav.scrolled {
+  border-bottom-color: var(--separator);
+  background: rgba(242,242,247,.86);
+}
+@media (prefers-color-scheme: dark) {
+  .nav.scrolled { background: rgba(28,28,30,.86); }
+}
+.nav-bar {
+  height: var(--nav-h); display: flex; align-items: center; justify-content: center;
+  position: relative; padding: 0 16px;
+}
+.nav-title {
+  font-size: 17px; font-weight: 600; letter-spacing: -.01em;
+  opacity: 0; transform: translateY(4px);
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events: none;
+}
+.nav.scrolled .nav-title { opacity: 1; transform: none; }
+.nav-trailing {
+  position: absolute; right: 10px; top: 0; bottom: 0;
+  display: flex; align-items: center; gap: 4px;
+}
+.nav-btn {
+  appearance: none; border: none; background: transparent;
+  color: var(--accent); font: inherit; font-size: 17px; font-weight: 400;
+  padding: 8px 10px; border-radius: 8px; cursor: pointer;
+}
+.nav-btn:active { opacity: .5; }
+
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 16px 24px; }
+.large-title {
+  font-size: var(--large-title); font-weight: 700; letter-spacing: .01em;
+  margin: 4px 0 4px; line-height: 1.15;
+}
+.subhead {
+  color: var(--secondary-a); font-size: 13px; font-weight: 400;
+  margin: 0 0 18px; line-height: 1.35;
+}
+
+/* —— Grouped inset lists —— */
+.group { margin: 0 0 28px; }
+.group-header {
+  font-size: 13px; font-weight: 400; color: var(--secondary-a);
+  text-transform: uppercase; letter-spacing: -.01em;
+  padding: 0 16px 6px; margin: 0;
+}
+.group-footer {
+  font-size: 13px; color: var(--secondary-a); padding: 8px 16px 0; margin: 0;
+  line-height: 1.35;
+}
+.group-footer a { color: var(--accent); text-decoration: none; }
+.card {
+  background: var(--grouped);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: 0;
+}
+.card > .pad { padding: 14px 16px; }
+.row-cell {
+  display: flex; align-items: center; gap: 12px;
+  min-height: 44px; padding: 10px 16px;
+  position: relative; background: var(--grouped);
+}
+.row-cell + .row-cell::before,
+.field-cell + .field-cell::before,
+.swipe-row + .swipe-row::before {
+  content: ""; position: absolute; left: 16px; right: 0; top: 0;
+  height: var(--hair); background: var(--separator);
+}
+.row-cell .label { flex: 1; font-size: 17px; }
+.row-cell .value { color: var(--secondary-a); font-size: 17px; text-align: right; }
+.row-cell .chev {
+  width: 8px; height: 13px; opacity: .3;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath fill='%23000' d='M1.5.5L7 6.5 1.5 12.5' stroke='%23000' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath fill='%23000' d='M1.5.5L7 6.5 1.5 12.5' stroke='%23000' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+.field-cell {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 10px 16px; position: relative; background: var(--grouped);
+}
+.field-cell .flabel { font-size: 13px; color: var(--secondary-a); }
+.field-cell input, .field-cell select, .field-cell textarea {
+  font: inherit; font-size: 17px; color: var(--ink);
+  background: transparent; border: none; padding: 0; width: 100%;
+  outline: none; border-radius: 0;
+}
+.field-cell textarea { min-height: 72px; resize: vertical; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; }
+@media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
+.grid2 .field-cell + .field-cell::before { left: 0; }
+
+/* legacy class bridges used by JS */
+label.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--secondary-a); flex: 1; min-width: 0; padding: 10px 16px; position: relative; }
+label.field input, label.field select, label.field textarea {
+  font: inherit; font-size: 17px; color: var(--ink); background: transparent;
+  border: none; padding: 4px 0; width: 100%; outline: none;
+}
+.muted { color: var(--secondary-a); font-size: 13px; }
+.money { font-variant-numeric: tabular-nums; }
+
+button, .btn {
+  appearance: none; border: none; cursor: pointer; font: inherit; font-weight: 600;
+  border-radius: 10px; padding: 11px 16px; background: var(--accent); color: #fff;
+}
+button:active, .btn:active { opacity: .7; }
+button.ghost, .btn.ghost {
+  background: transparent; color: var(--accent); font-weight: 400; padding: 8px 12px;
+}
+button.danger { background: var(--bad); color: #fff; }
+button.sm { padding: 8px 12px; font-size: 15px; font-weight: 600; }
+button.linkish {
+  background: transparent; color: var(--accent); font-weight: 400; padding: 0; font-size: 17px;
+}
+
+/* iOS switch */
+.switch {
+  position: relative; width: 51px; height: 31px; flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.switch .track {
+  position: absolute; inset: 0; border-radius: 31px; background: var(--fill);
+  transition: background .2s ease;
+}
+.switch .thumb {
+  position: absolute; top: 2px; left: 2px; width: 27px; height: 27px;
+  border-radius: 50%; background: #fff;
+  box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.16);
+  transition: transform .2s ease;
+}
+.switch input:checked + .track { background: var(--good); }
+.switch input:checked + .track + .thumb { transform: translateX(20px); }
+
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 16px; font-size: 17px; min-height: 44px;
+}
+
+/* Segmented control */
+.segmented {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  background: var(--fill); border-radius: 9px; padding: 2px; gap: 0;
+  margin: 0 16px 12px;
+}
+.segmented button {
+  background: transparent; color: var(--ink); font-weight: 500; font-size: 13px;
+  padding: 7px 8px; border-radius: 7px; box-shadow: none;
+}
+.segmented button.active {
+  background: var(--bg-elevated); box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+  .segmented button.active { background: #636366; box-shadow: none; }
+}
+
+/* Pills */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; background: var(--fill); color: var(--secondary-a);
+}
+.pill.done { background: rgba(52,199,89,.18); color: var(--good); }
+.pill.active { background: rgba(255,149,0,.18); color: var(--warn); }
+.pill.todo { background: var(--fill); color: var(--secondary-a); }
+.pill.blocked { background: rgba(255,59,48,.18); color: var(--bad); }
+
+.pill-row { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0; }
+
+/* Progress */
+.progress-ring-wrap { display: flex; align-items: center; gap: 16px; }
+.progress-ring { width: 88px; height: 88px; position: relative; flex-shrink: 0; }
+.progress-ring svg { transform: rotate(-90deg); }
+.progress-ring .pct {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -.02em;
+}
+.stat { font-size: 13px; color: var(--secondary-a); }
+.stat strong { display: block; font-size: 20px; font-weight: 600; color: var(--ink); letter-spacing: -.02em; }
+.dash { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; }
+@media (max-width: 560px) { .dash { grid-template-columns: 1fr; } }
+
+.budget-bar {
+  height: 8px; border-radius: 999px; background: var(--fill); overflow: hidden; margin: 10px 0 6px;
+}
+.budget-bar > span {
+  display: block; height: 100%; border-radius: 999px; background: var(--good); transition: width .25s ease;
+}
+.budget-bar.over > span { background: var(--bad); }
+.budget-bar.warn > span { background: var(--warn); }
+.budget-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px;
+}
+@media (max-width: 560px) { .budget-grid { grid-template-columns: 1fr 1fr; } }
+
+.cap-row { display: flex; flex-wrap: wrap; gap: 0; align-items: stretch; }
+.cap-row .field { max-width: 160px; }
+
+/* Images */
+.plan-img, .lot-img {
+  width: 100%; display: block; cursor: zoom-in; background: #fff;
+}
+.plan-img { border-radius: 0; }
+.img-frame { overflow: hidden; border-radius: var(--radius-lg); background: var(--grouped); }
+.img-caption { font-size: 13px; color: var(--secondary-a); padding: 10px 16px 14px; margin: 0; }
+
+.facts-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--separator);
+  border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 12px;
+}
+@media (max-width: 560px) { .facts-grid { grid-template-columns: 1fr 1fr; } }
+.fact {
+  background: var(--grouped); padding: 14px 12px; text-align: center;
+}
+.fact .n { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -.02em; }
+.fact .u { font-size: 12px; color: var(--secondary-a); margin-top: 2px; }
+
+.room-list { margin: 0; padding: 0; list-style: none; }
+.room-list li {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 11px 16px; position: relative; font-size: 15px;
+}
+.room-list li + li::before {
+  content: ""; position: absolute; left: 16px; right: 0; top: 0;
+  height: var(--hair); background: var(--separator);
+}
+.room-list .dim { color: var(--secondary-a); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Swipe rows */
+.swipe-host { position: relative; overflow: hidden; background: var(--bad); }
+.swipe-actions {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  display: flex; align-items: stretch;
+}
+.swipe-actions button {
+  border-radius: 0; padding: 0 22px; font-weight: 600; font-size: 15px;
+  background: var(--bad); color: #fff; min-width: 80px;
+}
+.swipe-row {
+  position: relative; background: var(--grouped);
+  transition: transform .2s ease; touch-action: pan-y;
+  will-change: transform;
+}
+.swipe-row.open { transition: transform .2s ease; }
+
+.list { list-style: none; margin: 0; padding: 0; }
+.list > li, .idea {
+  background: var(--grouped);
+}
+.list .top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; padding: 12px 16px; }
+.list .title { font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
+.list .meta { font-size: 13px; color: var(--secondary-a); margin-top: 4px; line-height: 1.4; }
+.drag-handle { cursor: grab; color: var(--tertiary); user-select: none; padding: 2px 4px; font-size: 18px; }
+.step-edit { display: none; }
+.step-edit.hidden { display: none; }
+.empty { text-align: center; color: var(--secondary-a); padding: 28px 16px; font-size: 15px; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; padding: 4px 0 10px; }
+.idea { padding: 12px 16px; position: relative; }
+.idea + .idea::before {
+  content: ""; position: absolute; left: 16px; right: 0; top: 0; height: var(--hair); background: var(--separator);
+}
+.idea textarea {
+  font: inherit; font-size: 17px; width: 100%; border: none; background: transparent;
+  color: var(--ink); resize: vertical; min-height: 56px; outline: none; padding: 0;
+}
+.idea .when { font-size: 12px; color: var(--secondary-a); }
+
+.caution {
+  background: rgba(255,149,0,.12); color: var(--warn);
+  border-radius: var(--radius-lg); padding: 12px 14px; font-size: 13px; margin: 12px 0 0;
+  line-height: 1.4;
+}
+.caution.hidden { display: none; }
+.grade-board {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; padding: 0 0 4px;
+}
+@media (max-width: 700px) { .grade-board { grid-template-columns: 1fr 1fr; } }
+.grade-card {
+  border: 1.5px solid transparent; border-radius: var(--radius-lg);
+  padding: 10px 8px; background: var(--grouped);
+  cursor: pointer; text-align: center; transition: .15s ease;
+  box-shadow: 0 0 0 1px var(--separator);
+}
+.grade-card.selected {
+  border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent);
+  background: rgba(0,122,255,.08);
+}
+.grade-card .g { font-weight: 700; font-size: 17px; color: var(--accent); }
+.grade-card .note { font-size: 11px; color: var(--secondary-a); margin-top: 4px; line-height: 1.3; }
+.grade-card svg { width: 100%; height: 54px; display: block; margin: 4px 0; }
+
+/* Panels */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Tab bar */
+.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 70;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  height: calc(var(--tab-h) + var(--safe-b));
+  padding-bottom: var(--safe-b);
+  background: rgba(249,249,249,.86);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border-top: var(--hair) solid var(--separator);
+}
+@media (prefers-color-scheme: dark) {
+  .tabs { background: rgba(22,22,24,.86); }
+}
+.tabs button {
+  background: transparent; color: var(--secondary-a);
+  border-radius: 0; padding: 6px 2px 2px;
+  font-size: 10px; font-weight: 500; letter-spacing: -.01em;
+  display: flex; flex-direction: column; gap: 2px; align-items: center; justify-content: flex-start;
+  box-shadow: none;
+}
+.tabs button.active { color: var(--accent); }
+.tabs .ico {
+  width: 25px; height: 25px; display: grid; place-items: center;
+}
+.tabs .ico svg { width: 25px; height: 25px; stroke: currentColor; fill: none;
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Lightbox */
+.lightbox {
+  display: none; position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,.92);
+  align-items: center; justify-content: center; padding: 12px;
+}
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+
+/* Sheet modal */
+.sheet-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,.36);
+}
+.sheet-backdrop.open { display: block; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 110;
+  max-height: min(92vh, 860px);
+  background: var(--bg);
+  border-radius: 14px 14px 0 0;
+  box-shadow: var(--shadow-sheet);
+  transform: translateY(105%);
+  transition: transform .32s cubic-bezier(.32,.72,0,1);
+  display: flex; flex-direction: column;
+  padding-bottom: var(--safe-b);
+}
+.sheet.open { transform: translateY(0); }
+.sheet-grab {
+  width: 36px; height: 5px; border-radius: 3px; background: var(--fill);
+  margin: 8px auto 0; flex-shrink: 0;
+}
+.sheet-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 8px 10px; flex-shrink: 0;
+  border-bottom: var(--hair) solid var(--separator);
+}
+.sheet-nav .stitle { font-size: 17px; font-weight: 600; }
+.sheet-body {
+  overflow: auto; -webkit-overflow-scrolling: touch;
+  padding: 12px 16px 24px; flex: 1;
+}
+.sheet-body .card { margin-bottom: 16px; }
+.sheet .field-stack { display: grid; gap: 0; }
+.sheet .field-stack .field-cell { background: var(--grouped); }
+.sheet .field-stack .field-cell:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.sheet .field-stack .field-cell:last-child { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.sheet .field-stack .field-cell:only-child { border-radius: var(--radius-lg); }
+
+footer.tiny {
+  text-align: center; color: var(--secondary-a); font-size: 12px;
+  padding: 8px 16px 20px; line-height: 1.4;
+}
+
 </style>
 </head>
 <body>
-<header class="app">
-  <h1>Clarence Ct Build</h1>
-  <p class="sub">Build on 28630 · ROFR on 28642 · Spring 2027 · Back Forty (~80%)</p>
+<header class="nav" id="appNav">
+  <div class="nav-bar">
+    <div class="nav-title" id="navTitle">Clarence Ct</div>
+    <div class="nav-trailing">
+      <button type="button" class="nav-btn" id="btnExport" title="Export">Export</button>
+    </div>
+  </div>
 </header>
 
 <div class="wrap">
-  <!-- DASH / HOME -->
+  <h1 class="large-title" id="largeTitle">Clarence Ct</h1>
+  <p class="subhead" id="pageSub">Build on 28630 · ROFR on 28642 · U13 plan · Spring 2027</p>
+
+  <!-- HOME -->
   <section id="panel-home" class="panel active">
-    <div class="card">
-      <h2>Progress</h2>
-      <div class="dash">
-        <div class="progress-ring-wrap">
-          <div class="progress-ring">
-            <svg viewBox="0 0 100 100" width="88" height="88" aria-hidden="true">
-              <circle cx="50" cy="50" r="40" fill="none" stroke="#e8dfd0" stroke-width="10"/>
-              <circle id="ringArc" cx="50" cy="50" r="40" fill="none" stroke="#8b5e3c" stroke-width="10"
-                stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
-            </svg>
-            <div class="pct" id="pctLabel">0%</div>
+    <div class="group">
+      <h2 class="group-header">Progress</h2>
+      <div class="card">
+        <div class="pad">
+          <div class="dash">
+            <div class="progress-ring-wrap">
+              <div class="progress-ring">
+                <svg viewBox="0 0 100 100" width="88" height="88" aria-hidden="true">
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--fill)" stroke-width="10"/>
+                  <circle id="ringArc" cx="50" cy="50" r="40" fill="none" stroke="var(--accent)" stroke-width="10"
+                    stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+                </svg>
+                <div class="pct" id="pctLabel">0%</div>
+              </div>
+              <div>
+                <div class="stat"><strong id="doneCount">0</strong>steps done</div>
+                <div class="stat" id="remainCount" style="margin-top:6px">0 remaining</div>
+                <div class="stat" id="capGlance" style="margin-top:6px">Cap —</div>
+              </div>
+            </div>
+            <div>
+              <div class="muted" style="font-size:13px;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.02em">Up next</div>
+              <ul class="list" id="upcomingList" style="margin:0 -16px"></ul>
+            </div>
           </div>
-          <div>
-            <div class="stat"><strong id="doneCount">0</strong> steps done</div>
-            <div class="stat muted" id="remainCount">0 remaining</div>
-            <div class="stat muted" id="capGlance">Cap —</div>
-          </div>
-        </div>
-        <div>
-          <h3 style="margin-top:0">Up next</h3>
-          <ul class="list" id="upcomingList"></ul>
         </div>
       </div>
     </div>
-    <div class="card budget-card">
-      <h2>Budget cap</h2>
-      <p class="muted">Base build target. 28642 ROFR stays separate (not under this cap).</p>
-      <div class="cap-row">
-        <label class="field" style="max-width:200px">Cap ($)
-          <input type="number" id="budgetCap" min="0" step="1000" />
-        </label>
-        <label class="toggle-row" style="margin:0 0 10px">
-          <input type="checkbox" id="capIncludesLand" />
-          Cap includes land ($55k on 28630) — default on, confirm with Nick
-        </label>
+
+    <div class="group budget-card">
+      <h2 class="group-header">Budget cap</h2>
+      <div class="card">
+        <div class="cap-row">
+          <label class="field" style="max-width:180px">Cap ($)
+            <input type="number" id="budgetCap" min="0" step="1000" inputmode="decimal" />
+          </label>
+          <div class="toggle-row" style="flex:1">
+            <span style="flex:1;font-size:15px;line-height:1.3">Cap includes land ($55k on 28630)</span>
+            <label class="switch">
+              <input type="checkbox" id="capIncludesLand" />
+              <span class="track"></span><span class="thumb"></span>
+            </label>
+          </div>
+        </div>
+        <div class="pad" style="padding-top:0">
+          <p class="muted" style="margin:0 0 8px">Base build target. 28642 ROFR stays separate (not under this cap).</p>
+          <div class="budget-grid">
+            <div class="stat"><strong id="capVal">—</strong>Cap</div>
+            <div class="stat"><strong id="plannedVal">—</strong>Planned</div>
+            <div class="stat"><strong id="actualVal">—</strong>Actual spent</div>
+            <div class="stat"><strong id="remainVal">—</strong><span id="remainLabel">Remaining</span></div>
+          </div>
+          <div class="budget-bar" id="budgetBar"><span id="budgetBarFill" style="width:0%"></span></div>
+          <div class="muted money" id="budgetBarLabel">—</div>
+          <div class="stat money" id="budgetSummary" style="margin-top:10px">Budget —</div>
+          <div class="stat money" id="budgetWithRofr" style="margin-top:4px"></div>
+        </div>
       </div>
-      <div class="budget-grid">
-        <div class="stat"><strong id="capVal">—</strong><span class="muted">Cap</span></div>
-        <div class="stat"><strong id="plannedVal">—</strong><span class="muted">Planned</span></div>
-        <div class="stat"><strong id="actualVal">—</strong><span class="muted">Actual spent</span></div>
-        <div class="stat"><strong id="remainVal">—</strong><span class="muted" id="remainLabel">Remaining</span></div>
-      </div>
-      <div class="budget-bar" id="budgetBar"><span id="budgetBarFill" style="width:0%"></span></div>
-      <div class="muted money" id="budgetBarLabel">—</div>
-      <div class="stat muted money" id="budgetSummary" style="margin-top:10px">Budget —</div>
-      <div class="stat muted money" id="budgetWithRofr" style="margin-top:4px"></div>
     </div>
-    <div class="card">
-      <h2>Quick facts</h2>
-      <div class="row">
-        <span class="pill">Build site: <strong style="margin-left:4px">28630</strong></span>
-        <span class="pill">ROFR option: 28642</span>
-        <span class="pill">Combined if acquired: ~2.83 ac</span>
-        <span class="pill">28630 land $55k · close Jan 15, 2027</span>
-        <span class="pill">28642 ROFR $45k contingent</span>
-        <span class="pill">Plan: 103′ × 68′ BF1</span>
-        <span class="pill">Base cap $350k</span>
-        <span class="pill">Target start: Apr 2027</span>
-      </div>
-      <p class="muted" style="margin-top:10px">Data saves on this phone (localStorage). Use Export JSON for a backup.</p>
-      <div class="toolbar" style="margin-top:8px">
-        <button type="button" class="ghost sm" id="btnExport">Export JSON</button>
-        <button type="button" class="ghost sm" id="btnImport">Import JSON</button>
-        <input type="file" id="importFile" accept="application/json,.json" hidden />
-        <button type="button" class="ghost sm danger" id="btnReset" style="color:var(--bad)">Reset defaults</button>
+
+    <div class="group">
+      <h2 class="group-header">Quick facts</h2>
+      <div class="card">
+        <div class="pad">
+          <div class="pill-row">
+            <span class="pill">Build site: <strong style="margin-left:4px">28630</strong></span>
+            <span class="pill">ROFR option: 28642</span>
+            <span class="pill">Combined if acquired: ~2.83 ac</span>
+            <span class="pill">28630 land $55k · close Jan 15, 2027</span>
+            <span class="pill">28642 ROFR $45k contingent</span>
+            <span class="pill">Plan: U13 · 2,636 sf living</span>
+            <span class="pill">Garage 900 · Gym 144 · Util 60</span>
+            <span class="pill">Base cap $350k</span>
+            <span class="pill">Target start: Apr 2027</span>
+          </div>
+          <p class="muted" style="margin:12px 0 0">Data saves on this device. Use Export for a backup. Add to Home Screen for a full-screen app.</p>
+        </div>
+        <div class="row-cell" style="justify-content:flex-start;gap:16px">
+          <button type="button" class="linkish" id="btnImport">Import JSON</button>
+          <input type="file" id="importFile" accept="application/json,.json" hidden />
+          <button type="button" class="linkish" id="btnReset" style="color:var(--bad)">Reset defaults</button>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- PLAN -->
   <section id="panel-plan" class="panel">
-    <div class="card">
-      <h2>Floor plan</h2>
-      <p class="muted">Back Forty Building Co. style layout — about <strong>80%</strong> of what you want. Overall ~103′ × 68′. Latest edit (BF1): office/library next to bedroom 2 + 12×12 gym east of the mech room in the garage.</p>
-      <h3>Your working plan (BF1)</h3>
-      <img class="plan-img" src="assets/plan-bf1.jpg" alt="BF1 farmhouse floor plan" data-full="assets/plan-bf1.jpg" />
-      <h3>Original reference</h3>
-      <img class="plan-img" src="assets/plan-ref.jpg" alt="Back Forty reference plan" data-full="assets/plan-ref.jpg" />
-    </div>
-    <div class="card">
-      <h2>Plan notes &amp; changes</h2>
-      <p class="muted">Track what still needs to change from the ~80% plan.</p>
-      <div class="toolbar">
-        <button type="button" class="sm" id="addPlanNote">+ Add note</button>
+    <div class="group">
+      <h2 class="group-header">Plan facts — U13</h2>
+      <div class="facts-grid">
+        <div class="fact"><div class="n">2,636</div><div class="u">Living sf</div></div>
+        <div class="fact"><div class="n">900</div><div class="u">Garage sf</div></div>
+        <div class="fact"><div class="n">144</div><div class="u">Gym sf</div></div>
+        <div class="fact"><div class="n">60</div><div class="u">Utilities sf</div></div>
       </div>
-      <ul class="list" id="planNotes"></ul>
+      <div class="card">
+        <div class="pad" style="padding-bottom:8px">
+          <p class="muted" style="margin:0">Concept plan only — single-story U-shaped layout. Porch 40′ × 10′. Three-car garage with gym &amp; office/library wing.</p>
+        </div>
+        <ul class="room-list">
+          <li><span>Master bedroom</span><span class="dim">22′ × 14′6″</span></li>
+          <li><span>Master bath / closet</span><span class="dim">18′6″ × 9′6″ / 18′6″ × 7′6″</span></li>
+          <li><span>Bedroom 1</span><span class="dim">18′6″ × 11′6″</span></li>
+          <li><span>Bedroom 2</span><span class="dim">12′ × 12′</span></li>
+          <li><span>Living</span><span class="dim">15′ × 18′6″</span></li>
+          <li><span>Dining / Kitchen</span><span class="dim">12′ × 10′ / 13′ × 10′</span></li>
+          <li><span>Pantry / Powder</span><span class="dim">12′ × 5′ / 6′ × 5′</span></li>
+          <li><span>Office / Library</span><span class="dim">24′ × 10′</span></li>
+          <li><span>Garage (L)</span><span class="dim">24′ × 46′ · 900 sf</span></li>
+          <li><span>Gym</span><span class="dim">12′ × 12′ · 144 sf</span></li>
+          <li><span>Utilities / Laundry</span><span class="dim">60 sf / 8′6″ × 5′</span></li>
+          <li><span>Storage / Secure room</span><span class="dim">12′ × 9′ / 20′6″ × 5′</span></li>
+          <li><span>Porch</span><span class="dim">40′ × 10′</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2 class="group-header">Floor plan — line</h2>
+      <div class="card img-frame">
+        <img class="plan-img" src="assets/plan-u13.jpg" alt="U13 farmhouse floor plan line drawing" data-full="assets/plan-u13.jpg" />
+        <p class="img-caption">U13 working plan — tap to enlarge</p>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2 class="group-header">Floor plan — colored</h2>
+      <div class="card img-frame">
+        <img class="plan-img" src="assets/plan-u13-5d.jpg" alt="U13 colored 5D floor plan" data-full="assets/plan-u13-5d.jpg" />
+        <p class="img-caption">U13 colored layout — tap to enlarge</p>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2 class="group-header">Plan notes &amp; changes</h2>
+      <div class="toolbar">
+        <button type="button" class="sm" id="addPlanNote">Add Note</button>
+      </div>
+      <div class="card" id="planNotesHost">
+        <ul class="list" id="planNotes"></ul>
+      </div>
+      <p class="group-footer">Swipe a note left to delete. Tap to edit.</p>
     </div>
   </section>
 
   <!-- LOT -->
   <section id="panel-lot" class="panel">
-    <div class="card">
-      <h2>Lots — Clarence Ct (Koronis Ridge)</h2>
-      <p class="muted">House build is <strong>solely on 28630</strong>. Lot <strong>28642</strong> is under a <strong>right of first refusal</strong> (future option) — include it in planning, but not as the house site. Combined if acquired: <strong>~2.83 ac</strong> (1.38 + 1.45).</p>
-      <img class="lot-img" src="assets/lot-map.jpg" alt="28630 build site and 28642 ROFR option map" data-full="assets/lot-map.jpg" />
-      <p class="muted" style="margin-top:8px">Map: amber = build site 28630 · teal = ROFR option 28642</p>
+    <div class="group">
+      <h2 class="group-header">Lots — Clarence Ct (Koronis Ridge)</h2>
+      <div class="card img-frame">
+        <img class="lot-img" src="assets/lot-map.jpg" alt="28630 build site and 28642 ROFR option map" data-full="assets/lot-map.jpg" />
+        <p class="img-caption">Amber = build site 28630 · Teal = ROFR 28642 · Dark = approx U13 footprint. House build solely on 28630. Combined if acquired: ~2.83 ac.</p>
+      </div>
     </div>
-    <div class="card">
-      <h2>28630 — Build site</h2>
-      <p class="muted">Pre-filled from Stearns County GIS. House / driveway go here only. Fields stay editable.</p>
-      <div class="grid2" id="lotFields"></div>
-      <p class="muted" id="combinedAcres" style="margin-top:10px"></p>
-      <p class="muted" style="margin-top:12px;line-height:1.45" id="lotSource">
+
+    <div class="group">
+      <h2 class="group-header">28630 — Build site</h2>
+      <div class="card grid2" id="lotFields"></div>
+      <p class="group-footer" id="combinedAcres"></p>
+      <p class="group-footer" id="lotSource">
         <strong>Sources:</strong>
         Stearns County GIS hub
         (<a href="https://stearns-county-gis-stearns.hub.arcgis.com" target="_blank" rel="noopener">hub</a>)
         · Parcels MapServer
         (<a href="https://gis.co.stearns.mn.us/arcgis/rest/services/General/Parcels/MapServer/0" target="_blank" rel="noopener">REST</a>, queried Oct 30, 2026 America/Chicago)
-        · Zoning shapefile download “Zoning Districts – Oct 15, 2026”
-        (<a href="https://gis.co.stearns.mn.us/gisdata/zoning.zip" target="_blank" rel="noopener">zoning.zip</a>) → R-5 at site
+        · Zoning shapefile “Zoning Districts – Oct 15, 2026”
+        (<a href="https://gis.co.stearns.mn.us/gisdata/zoning.zip" target="_blank" rel="noopener">zoning.zip</a>) → R-5
         · Elevation: USGS 3DEP via
-        <a href="https://epqs.nationalmap.gov/" target="_blank" rel="noopener">EPQS</a> (estimate only, not a survey).
-        Property Viewer / Datafi:
+        <a href="https://epqs.nationalmap.gov/" target="_blank" rel="noopener">EPQS</a>.
+        Property Viewer:
         <a href="https://datafi.wsbeng.com/#!prod/county!mn!stearns!public" target="_blank" rel="noopener">datafi.wsbeng.com</a>.
       </p>
     </div>
-    <div class="card">
-      <h2>28642 — Right of first refusal (future option)</h2>
-      <p class="muted">Not the house build site. Track ROFR terms and possible future uses. GIS fields pre-filled; ROFR fields are yours to fill.</p>
-      <div class="grid2" id="rofrFields"></div>
-    </div>
-    <div class="card">
-      <h2>Driveway</h2>
-      <p class="muted">Paved driveway from the cul-de-sac up to the garage on lot 28630. Grade is editable — defaulting to ~10% (estimate pending survey).</p>
-      <div class="grid2">
-        <label class="field">Surface
-          <select id="drvSurface"></select>
-        </label>
-        <label class="field">Grade %
-          <input type="number" id="drvGrade" min="1" max="40" step="0.5" />
-        </label>
-        <label class="field">Length (ft) — TBD
-          <input type="text" id="drvLength" placeholder="e.g. 80" />
-        </label>
-        <label class="field">Width (ft)
-          <input type="text" id="drvWidth" placeholder="e.g. 12" />
-        </label>
-        <label class="field">Est. cost (grading + base)
-          <input type="number" id="drvCostBase" min="0" step="100" />
-        </label>
-        <label class="field">Est. cost (paving)
-          <input type="number" id="drvCostPave" min="0" step="100" />
-        </label>
-      </div>
-      <label class="field" style="margin-top:10px">Driveway notes
-        <textarea id="drvNotes" placeholder="Access path, turnaround, snow storage…"></textarea>
-      </label>
 
-      <h3>Grade comparison (side profile)</h3>
-      <p class="muted">Rise per 100 ft of run. Tap a card to set your driveway grade.</p>
-      <div class="grade-board" id="gradeBoard"></div>
-      <div class="caution hidden" id="gradeCaution">
-        <strong>Grade caution:</strong> Above ~15% is steeper than many county / fire-access comfort ranges (often ~10–15%). Confirm with Stearns County and your builder before locking this in — winter traction, emergency access, and vehicle clearance all matter.
+    <div class="group">
+      <h2 class="group-header">28642 — Right of first refusal</h2>
+      <p class="group-footer" style="padding-top:0;padding-bottom:8px">Not the house build site. Track ROFR terms and possible future uses.</p>
+      <div class="card grid2" id="rofrFields"></div>
+    </div>
+
+    <div class="group">
+      <h2 class="group-header">Driveway</h2>
+      <div class="card">
+        <div class="grid2">
+          <label class="field">Surface
+            <select id="drvSurface"></select>
+          </label>
+          <label class="field">Grade %
+            <input type="number" id="drvGrade" min="1" max="40" step="0.5" inputmode="decimal" />
+          </label>
+          <label class="field">Length (ft) — TBD
+            <input type="text" id="drvLength" placeholder="e.g. 80" inputmode="decimal" />
+          </label>
+          <label class="field">Width (ft)
+            <input type="text" id="drvWidth" placeholder="e.g. 12" inputmode="decimal" />
+          </label>
+          <label class="field">Est. cost (grading + base)
+            <input type="number" id="drvCostBase" min="0" step="100" inputmode="decimal" />
+          </label>
+          <label class="field">Est. cost (paving)
+            <input type="number" id="drvCostPave" min="0" step="100" inputmode="decimal" />
+          </label>
+        </div>
+        <label class="field">Driveway notes
+          <textarea id="drvNotes" placeholder="Access path, turnaround, snow storage…"></textarea>
+        </label>
+        <div class="pad">
+          <div class="muted" style="font-size:13px;font-weight:600;margin-bottom:4px">Grade comparison</div>
+          <p class="muted" style="margin:0 0 8px">Rise per 100 ft of run. Tap a card to set grade. Default ~10% pending survey.</p>
+          <div class="grade-board" id="gradeBoard"></div>
+          <div class="caution hidden" id="gradeCaution">
+            <strong>Grade caution:</strong> Above ~15% is steeper than many county / fire-access comfort ranges (often ~10–15%). Confirm with Stearns County and your builder before locking this in.
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- SCHEDULE -->
   <section id="panel-schedule" class="panel">
-    <div class="card">
-      <h2>Build schedule</h2>
-      <p class="muted">Month-by-month residential timeline starting spring (April) 2027 — Minnesota-aware. Edit dates, status, budget, and notes. Drag handle = reorder.</p>
+    <div class="group">
+      <h2 class="group-header">Build schedule</h2>
       <div class="toolbar">
-        <button type="button" class="sm" id="addStep">+ Add step</button>
+        <button type="button" class="sm" id="addStep">Add Step</button>
       </div>
-      <ul class="list" id="scheduleList"></ul>
+      <div class="card">
+        <ul class="list" id="scheduleList"></ul>
+      </div>
+      <p class="group-footer">Minnesota-aware timeline from spring 2027. Swipe left to delete · tap Edit for sheet · drag ⠿ to reorder.</p>
     </div>
   </section>
 
   <!-- IDEAS -->
   <section id="panel-ideas" class="panel">
-    <div class="card">
-      <h2>Build ideas</h2>
-      <p class="muted">Dump ideas anytime — finishes, outdoor, garage gym, well/septic, landscaping…</p>
+    <div class="group">
+      <h2 class="group-header">Build ideas</h2>
       <div class="toolbar">
-        <button type="button" class="sm" id="addIdea">+ Add idea</button>
+        <button type="button" class="sm" id="addIdea">Add Idea</button>
       </div>
-      <div class="idea-board" id="ideaBoard"></div>
+      <div class="card">
+        <div class="idea-board" id="ideaBoard"></div>
+      </div>
+      <p class="group-footer">Swipe left to delete an idea.</p>
     </div>
   </section>
 
@@ -359,18 +739,46 @@
 </div>
 
 <nav class="tabs" aria-label="Main">
-  <button type="button" data-tab="home" class="active"><span class="ico">⌂</span>Home</button>
-  <button type="button" data-tab="plan"><span class="ico">▦</span>Plan</button>
-  <button type="button" data-tab="lot"><span class="ico">◇</span>Lot</button>
-  <button type="button" data-tab="schedule"><span class="ico">☰</span>Schedule</button>
-  <button type="button" data-tab="ideas"><span class="ico">✎</span>Ideas</button>
+  <button type="button" data-tab="home" class="active" aria-label="Home">
+    <span class="ico"><svg viewBox="0 0 25 25"><path d="M4.5 11.5L12.5 4.5l8 7V21a.5.5 0 0 1-.5.5h-5.5v-6h-4v6H5a.5.5 0 0 1-.5-.5z"/></svg></span>
+    Home
+  </button>
+  <button type="button" data-tab="plan" aria-label="Plan">
+    <span class="ico"><svg viewBox="0 0 25 25"><rect x="4.5" y="4.5" width="16" height="16" rx="2"/><path d="M4.5 10.5h16M10.5 4.5v16"/></svg></span>
+    Plan
+  </button>
+  <button type="button" data-tab="lot" aria-label="Lot">
+    <span class="ico"><svg viewBox="0 0 25 25"><path d="M12.5 4.5l7 5.5v10.5h-5.5v-5h-3v5H5.5V10z"/></svg></span>
+    Lot
+  </button>
+  <button type="button" data-tab="schedule" aria-label="Schedule">
+    <span class="ico"><svg viewBox="0 0 25 25"><rect x="4.5" y="6.5" width="16" height="14" rx="2"/><path d="M8.5 4.5v4M16.5 4.5v4M4.5 10.5h16"/></svg></span>
+    Schedule
+  </button>
+  <button type="button" data-tab="ideas" aria-label="Ideas">
+    <span class="ico"><svg viewBox="0 0 25 25"><path d="M12.5 4.5a5.5 5.5 0 0 1 3.5 9.7V17.5h-7v-3.3a5.5 5.5 0 0 1 3.5-9.7z"/><path d="M10 20.5h5"/></svg></span>
+    Ideas
+  </button>
 </nav>
 
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true"><img alt="" id="lightboxImg" /></div>
 
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<div class="sheet" id="editSheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-grab"></div>
+  <div class="sheet-nav">
+    <button type="button" class="nav-btn" id="sheetCancel">Cancel</button>
+    <div class="stitle" id="sheetTitle">Edit</div>
+    <button type="button" class="nav-btn" id="sheetDone" style="font-weight:600">Done</button>
+  </div>
+  <div class="sheet-body" id="sheetBody"></div>
+</div>
+
+
 <script>
 (function () {
-  const STORE_KEY = 'clarence-ct-build-v6';
+  const STORE_KEY = 'clarence-ct-build-v7';
+  const PREV_STORE_KEYS = ['clarence-ct-build-v6'];
   const CIRC = 2 * Math.PI * 40;
 
   const LOT_FIELD_DEFS = [
@@ -427,13 +835,13 @@
       { title: 'Close on lot 28630', month: '2027-01', status: 'todo', budget: 55000, actual: 0, milestone: true, notes: 'Closing Jan 15, 2027 — land purchase $55,000 (build site only)' },
       { title: 'ROFR decision / review (28642)', month: '', status: 'todo', budget: 0, actual: 0, notes: 'Right of first refusal on 28642 — optional; house build stays on 28630 only' },
       { title: 'ROFR purchase 28642 (if exercised)', month: '', status: 'todo', budget: 45000, actual: 0, contingent: true, notes: 'Contingent / optional — agreed ROFR price $45,000. NOT in base budget; shown separately on dashboard.' },
-      { title: 'Finalize plan & selections', month: '2027-04', status: 'todo', budget: 5000, actual: 0, notes: 'BF1 is ~80% — lock changes with designer/builder' },
+      { title: 'Finalize plan & selections', month: '2027-04', status: 'todo', budget: 5000, actual: 0, notes: 'Lock U13 selections with designer/builder (2,636 sf living)' },
       { title: 'Site survey & soil / perc', month: '2027-04', status: 'todo', budget: 3500, actual: 0, notes: 'Confirm topography for driveway grade on 28630 (working estimate 10%)' },
       { title: 'Permits & county approvals', month: '2027-05', status: 'todo', budget: 4000, actual: 0, notes: 'Stearns County building, driveway/access, septic if needed' },
       { title: 'Clearing & excavation', month: '2027-05', status: 'todo', budget: 18000, actual: 0, notes: 'Pad, basement/crawl as designed' },
       { title: 'Driveway grading & base', month: '2027-05', status: 'todo', budget: 12000, actual: 0, notes: 'From cul-de-sac into garage; working ~10% grade — update after survey' },
       { title: 'Footings & foundation', month: '2027-06', status: 'todo', budget: 45000, actual: 0, notes: '' },
-      { title: 'Framing', month: '2027-07', status: 'todo', budget: 85000, actual: 0, notes: '103×68 farmhouse shell' },
+      { title: 'Framing', month: '2027-07', status: 'todo', budget: 85000, actual: 0, notes: 'U13 farmhouse shell — 2,636 sf living + garage/gym' },
       { title: 'Roof dry-in', month: '2027-08', status: 'todo', budget: 28000, actual: 0, notes: '' },
       { title: 'Windows & exterior doors', month: '2027-08', status: 'todo', budget: 22000, actual: 0, notes: '' },
       { title: 'MEP rough-in (mech/elec/plumb)', month: '2027-09', status: 'todo', budget: 55000, actual: 0, notes: 'Include garage gym / utilities room needs' },
@@ -453,10 +861,11 @@
     return {
       version: 1,
       planNotes: [
-        { id: uid(), text: 'Overall layout is about 80% of what we want — keep refining.', done: false },
-        { id: uid(), text: 'BF1: office/library next to bedroom 2.', done: true },
-        { id: uid(), text: 'BF1: 12×12 gym east of mech in garage.', done: true },
-        { id: uid(), text: 'Confirm garage stall depths and door count with builder.', done: false },
+        { id: uid(), text: 'U13 is the working plan — 2,636 sf living, 900 garage, 144 gym, 60 utilities.', done: true },
+        { id: uid(), text: 'Office/library 24×10 on the east wing.', done: true },
+        { id: uid(), text: '12×12 gym adjacent to the three-car garage.', done: true },
+        { id: uid(), text: 'Confirm garage stall depths, door count, and porch detailing with builder.', done: false },
+        { id: uid(), text: 'Verify master suite + bedroom wing setbacks on lot 28630 after survey.', done: false },
       ],
       lot: {
         address: '28630 Clarence Ct, Paynesville, MN 56362',
@@ -515,25 +924,42 @@
     };
   }
 
+  function mergeState(data) {
+    const d = defaults();
+    return {
+      ...d,
+      ...data,
+      lot: { ...d.lot, ...(data.lot || {}) },
+      lotRofr: { ...d.lotRofr, ...(data.lotRofr || {}) },
+      driveway: { ...d.driveway, ...(data.driveway || {}) },
+      budgetCap: data.budgetCap != null ? data.budgetCap : d.budgetCap,
+      capIncludesLand: data.capIncludesLand != null ? data.capIncludesLand : d.capIncludesLand,
+      planNotes: data.planNotes || d.planNotes,
+      schedule: data.schedule || d.schedule,
+      ideas: data.ideas || d.ideas,
+    };
+  }
+
   function load() {
     try {
-      const raw = localStorage.getItem(STORE_KEY);
+      let raw = localStorage.getItem(STORE_KEY);
+      if (!raw) {
+        for (const k of PREV_STORE_KEYS) {
+          const prev = localStorage.getItem(k);
+          if (prev) { raw = prev; break; }
+        }
+      }
       if (!raw) return defaults();
       const data = JSON.parse(raw);
-      // soft-merge missing keys
-      const d = defaults();
-      return {
-        ...d,
-        ...data,
-        lot: { ...d.lot, ...(data.lot || {}) },
-        lotRofr: { ...d.lotRofr, ...(data.lotRofr || {}) },
-        driveway: { ...d.driveway, ...(data.driveway || {}) },
-        budgetCap: data.budgetCap != null ? data.budgetCap : d.budgetCap,
-        capIncludesLand: data.capIncludesLand != null ? data.capIncludesLand : d.capIncludesLand,
-        planNotes: data.planNotes || d.planNotes,
-        schedule: data.schedule || d.schedule,
-        ideas: data.ideas || d.ideas,
-      };
+      const merged = mergeState(data);
+      // Soft-upgrade BF1 / 80% leftovers in migrated schedule notes & plan notes
+      (merged.schedule || []).forEach(s => {
+        if (s.notes && /BF1|~80%|103×68|103x68/i.test(s.notes)) {
+          if (/Finalize plan/i.test(s.title)) s.notes = 'Lock U13 selections with designer/builder (2,636 sf living)';
+          if (/Framing/i.test(s.title)) s.notes = 'U13 farmhouse shell — 2,636 sf living + garage/gym';
+        }
+      });
+      return merged;
     } catch (e) {
       return defaults();
     }
@@ -548,16 +974,35 @@
     }, 120);
   }
 
-  // Tabs
+  const TAB_META = {
+    home: { title: 'Clarence Ct', sub: 'Build on 28630 · ROFR on 28642 · U13 plan · Spring 2027' },
+    plan: { title: 'Plan', sub: 'U13 · 2,636 sf living · concept only' },
+    lot: { title: 'Lot', sub: '28630 build site · 28642 ROFR · driveway' },
+    schedule: { title: 'Schedule', sub: 'Spring 2027 start · Minnesota-aware' },
+    ideas: { title: 'Ideas', sub: 'Finishes, outdoor, gym, well/septic…' },
+  };
+  function setTab(tab) {
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+    const meta = TAB_META[tab] || TAB_META.home;
+    document.getElementById('largeTitle').textContent = meta.title;
+    document.getElementById('navTitle').textContent = meta.title;
+    document.getElementById('pageSub').textContent = meta.sub;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateNavCollapse();
+  }
   document.querySelectorAll('.tabs button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    btn.addEventListener('click', () => setTab(btn.dataset.tab));
   });
+
+  // Large-title collapse
+  const appNav = document.getElementById('appNav');
+  function updateNavCollapse() {
+    const y = window.scrollY || document.documentElement.scrollTop;
+    appNav.classList.toggle('scrolled', y > 40);
+  }
+  window.addEventListener('scroll', updateNavCollapse, { passive: true });
+  updateNavCollapse();
 
   // Lightbox
   const lb = document.getElementById('lightbox');
@@ -569,6 +1014,78 @@
     });
   });
   lb.addEventListener('click', () => lb.classList.remove('open'));
+
+
+  // —— Sheet modal ——
+  const sheet = document.getElementById('editSheet');
+  const sheetBackdrop = document.getElementById('sheetBackdrop');
+  const sheetBody = document.getElementById('sheetBody');
+  const sheetTitle = document.getElementById('sheetTitle');
+  let sheetOnDone = null;
+  let sheetOnCancel = null;
+
+  function openSheet(title, html, onDone, onCancel) {
+    sheetTitle.textContent = title;
+    sheetBody.innerHTML = html;
+    sheetOnDone = onDone || null;
+    sheetOnCancel = onCancel || null;
+    sheetBackdrop.classList.add('open');
+    sheet.classList.add('open');
+    document.body.classList.add('sheet-open');
+  }
+  function closeSheet(save) {
+    if (save && sheetOnDone) sheetOnDone();
+    if (!save && sheetOnCancel) sheetOnCancel();
+    sheet.classList.remove('open');
+    sheetBackdrop.classList.remove('open');
+    document.body.classList.remove('sheet-open');
+    sheetOnDone = sheetOnCancel = null;
+    setTimeout(() => { sheetBody.innerHTML = ''; }, 320);
+  }
+  document.getElementById('sheetDone').addEventListener('click', () => closeSheet(true));
+  document.getElementById('sheetCancel').addEventListener('click', () => closeSheet(false));
+  sheetBackdrop.addEventListener('click', () => closeSheet(false));
+
+  // —— Swipe to delete ——
+  function bindSwipe(root) {
+    if (!root || root._swipeBound) return;
+    root._swipeBound = true;
+    let startX = 0, startY = 0, dx = 0, row = null, locking = null;
+    const OPEN = -80;
+    function closeOthers(except) {
+      root.querySelectorAll('.swipe-row.open').forEach(el => {
+        if (el !== except) { el.style.transform = ''; el.classList.remove('open'); }
+      });
+    }
+    root.addEventListener('touchstart', e => {
+      const r = e.target.closest('.swipe-row');
+      if (!r) return;
+      closeOthers(r);
+      row = r; startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+      dx = 0; locking = null;
+      r.style.transition = 'none';
+    }, { passive: true });
+    root.addEventListener('touchmove', e => {
+      if (!row) return;
+      const x = e.touches[0].clientX - startX;
+      const y = e.touches[0].clientY - startY;
+      if (locking === null) {
+        if (Math.abs(x) < 6 && Math.abs(y) < 6) return;
+        locking = Math.abs(x) > Math.abs(y);
+        if (!locking) { row = null; return; }
+      }
+      if (!locking) return;
+      dx = Math.min(0, Math.max(OPEN - 20, x));
+      row.style.transform = 'translateX(' + dx + 'px)';
+    }, { passive: true });
+    root.addEventListener('touchend', () => {
+      if (!row) return;
+      row.style.transition = '';
+      if (dx < OPEN / 2) { row.style.transform = 'translateX(' + OPEN + 'px)'; row.classList.add('open'); }
+      else { row.style.transform = ''; row.classList.remove('open'); }
+      row = null;
+    });
+  }
 
   // —— HOME ——
   function renderHome() {
@@ -673,15 +1190,19 @@
       return;
     }
     ul.innerHTML = state.planNotes.map(n => `
-      <li>
-        <div class="top">
-          <label style="display:flex;gap:8px;align-items:flex-start;flex:1">
-            <input type="checkbox" data-note-done="${n.id}" ${n.done ? 'checked' : ''} style="margin-top:4px;width:auto" />
-            <input data-note-text="${n.id}" value="${escAttr(n.text)}" style="flex:1" />
-          </label>
-          <button type="button" class="ghost sm" data-note-del="${n.id}">✕</button>
+      <li class="swipe-host" data-note-host="${n.id}">
+        <div class="swipe-actions"><button type="button" data-note-del="${n.id}">Delete</button></div>
+        <div class="swipe-row">
+          <div class="top" style="align-items:center">
+            <label class="switch" style="width:51px;flex-shrink:0" title="Done">
+              <input type="checkbox" data-note-done="${n.id}" ${n.done ? 'checked' : ''} />
+              <span class="track"></span><span class="thumb"></span>
+            </label>
+            <input data-note-text="${n.id}" value="${escAttr(n.text)}" style="flex:1;border:none;background:transparent;font:inherit;font-size:17px;color:var(--ink);outline:none;padding:4px 0" />
+          </div>
         </div>
       </li>`).join('');
+    bindSwipe(ul);
   }
   document.getElementById('addPlanNote').addEventListener('click', () => {
     state.planNotes.unshift({ id: uid(), text: 'New plan change…', done: false });
@@ -823,10 +1344,10 @@
     const x1 = w - pad;
     const maxRiseDraw = 36; // visual cap so 30% still fits
     const y1 = y0 - Math.min(maxRiseDraw, rise * (maxRiseDraw / 30));
-    const stroke = selected ? '#8b5e3c' : '#9a8b78';
+    const stroke = selected ? 'var(--accent)' : 'var(--secondary-a)';
     return `<svg viewBox="0 0 ${w} ${h}" aria-hidden="true">
-      <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#d9cbb8" stroke-width="1"/>
-      <polygon points="${x0},${y0} ${x1},${y0} ${x1},${y1}" fill="${selected?'#f3e4c8':'#efe8dc'}" opacity=".9"/>
+      <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="var(--separator)" stroke-width="1"/>
+      <polygon points="${x0},${y0} ${x1},${y0} ${x1},${y1}" fill="${selected?'rgba(0,122,255,.12)':'var(--fill2)'}" opacity=".95"/>
       <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
       <circle cx="${x1}" cy="${y1}" r="3" fill="${stroke}"/>
     </svg>`;
@@ -888,42 +1409,87 @@
     const steps = [...state.schedule].sort((a,b) => a.order - b.order);
     if (!steps.length) { ul.innerHTML = '<li class="empty">No steps</li>'; return; }
     ul.innerHTML = steps.map(s => `
-      <li data-step="${s.id}" draggable="true">
-        <div class="top">
-          <span class="drag-handle" title="Drag to reorder">⠿</span>
-          <div style="flex:1">
-            <div class="title">${esc(s.title)}</div>
-            <div class="meta">${stepWhen(s)} · ${statusPill(s.status)}${flagsPills(s)} ·
-              budget <span class="money">$${(Number(s.budget)||0).toLocaleString()}</span>${s.contingent ? ' <em>(not in base)</em>' : ''}
-              · actual <span class="money">$${(Number(s.actual)||0).toLocaleString()}</span>
+      <li class="swipe-host" data-step-host="${s.id}">
+        <div class="swipe-actions"><button type="button" data-del-step="${s.id}">Delete</button></div>
+        <div class="swipe-row" data-step="${s.id}" draggable="true">
+          <div class="top">
+            <span class="drag-handle" title="Drag to reorder">⠿</span>
+            <div style="flex:1;min-width:0">
+              <div class="title">${esc(s.title)}</div>
+              <div class="meta">${stepWhen(s)} · ${statusPill(s.status)}${flagsPills(s)} ·
+                budget <span class="money">$${(Number(s.budget)||0).toLocaleString()}</span>${s.contingent ? ' <em>(not in base)</em>' : ''}
+                · actual <span class="money">$${(Number(s.actual)||0).toLocaleString()}</span>
+              </div>
             </div>
-          </div>
-          <button type="button" class="ghost sm" data-toggle-edit="${s.id}">Edit</button>
-        </div>
-        <div class="step-edit hidden" id="edit-${s.id}">
-          <label class="field">Title<input data-sf="title" data-id="${s.id}" value="${escAttr(s.title)}" /></label>
-          <div class="grid2">
-            <label class="field">Month<input type="month" data-sf="month" data-id="${s.id}" value="${escAttr(s.month||'')}" /></label>
-            <label class="field">Status
-              <select data-sf="status" data-id="${s.id}">
-                ${['todo','active','done','blocked'].map(o => `<option value="${o}" ${s.status===o?'selected':''}>${o}</option>`).join('')}
-              </select>
-            </label>
-            <label class="field" style="flex-direction:row;align-items:center;gap:8px">
-              <input type="checkbox" data-sf="milestone" data-id="${s.id}" ${s.milestone?'checked':''} style="width:auto" /> Milestone
-            </label>
-            <label class="field" style="flex-direction:row;align-items:center;gap:8px">
-              <input type="checkbox" data-sf="contingent" data-id="${s.id}" ${s.contingent?'checked':''} style="width:auto" /> Contingent (not in base)
-            </label>
-            <label class="field">Budget $<input type="number" data-sf="budget" data-id="${s.id}" value="${Number(s.budget)||0}" /></label>
-            <label class="field">Actual $<input type="number" data-sf="actual" data-id="${s.id}" value="${Number(s.actual)||0}" /></label>
-          </div>
-          <label class="field">Notes<textarea data-sf="notes" data-id="${s.id}">${esc(s.notes||'')}</textarea></label>
-          <div class="row">
-            <button type="button" class="ghost sm danger" data-del-step="${s.id}">Delete step</button>
+            <button type="button" class="ghost sm" data-toggle-edit="${s.id}">Edit</button>
           </div>
         </div>
       </li>`).join('');
+    bindSwipe(ul);
+  }
+
+  function openStepSheet(id) {
+    const s = state.schedule.find(x => x.id === id);
+    if (!s) return;
+    const draft = {
+      title: s.title, month: s.month || '', status: s.status,
+      milestone: !!s.milestone, contingent: !!s.contingent,
+      budget: Number(s.budget)||0, actual: Number(s.actual)||0, notes: s.notes || ''
+    };
+    openSheet('Edit Step', `
+      <div class="field-stack card" style="overflow:hidden">
+        <div class="field-cell"><span class="flabel">Title</span>
+          <input id="sh-title" value="${escAttr(draft.title)}" /></div>
+        <div class="field-cell"><span class="flabel">Month</span>
+          <input type="month" id="sh-month" value="${escAttr(draft.month)}" /></div>
+        <div class="field-cell"><span class="flabel">Status</span>
+          <select id="sh-status">${['todo','active','done','blocked'].map(o =>
+            `<option value="${o}" ${draft.status===o?'selected':''}>${o}</option>`).join('')}</select></div>
+        <div class="field-cell"><span class="flabel">Budget $</span>
+          <input type="number" id="sh-budget" value="${draft.budget}" /></div>
+        <div class="field-cell"><span class="flabel">Actual $</span>
+          <input type="number" id="sh-actual" value="${draft.actual}" /></div>
+        <div class="field-cell"><span class="flabel">Notes</span>
+          <textarea id="sh-notes">${esc(draft.notes)}</textarea></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="toggle-row"><span>Milestone</span>
+          <label class="switch"><input type="checkbox" id="sh-milestone" ${draft.milestone?'checked':''}/><span class="track"></span><span class="thumb"></span></label>
+        </div>
+        <div class="toggle-row"><span>Contingent (not in base)</span>
+          <label class="switch"><input type="checkbox" id="sh-contingent" ${draft.contingent?'checked':''}/><span class="track"></span><span class="thumb"></span></label>
+        </div>
+      </div>
+      <div style="margin-top:20px">
+        <button type="button" class="danger sm" id="sh-delete" style="width:100%">Delete Step</button>
+      </div>
+    `, () => {
+      const step = state.schedule.find(x => x.id === id);
+      if (!step) return;
+      step.title = document.getElementById('sh-title').value;
+      step.month = document.getElementById('sh-month').value;
+      step.status = document.getElementById('sh-status').value;
+      step.budget = Number(document.getElementById('sh-budget').value) || 0;
+      step.actual = Number(document.getElementById('sh-actual').value) || 0;
+      step.notes = document.getElementById('sh-notes').value;
+      step.milestone = document.getElementById('sh-milestone').checked;
+      step.contingent = document.getElementById('sh-contingent').checked;
+      if (/driveway grading/i.test(step.title)) {
+        state.driveway.costBase = step.budget;
+        document.getElementById('drvCostBase').value = step.budget;
+      }
+      if (/driveway paving/i.test(step.title)) {
+        state.driveway.costPave = step.budget;
+        document.getElementById('drvCostPave').value = step.budget;
+      }
+      save(); renderSchedule(); renderHome();
+    });
+    document.getElementById('sh-delete').addEventListener('click', () => {
+      if (!confirm('Delete this step?')) return;
+      state.schedule = state.schedule.filter(x => x.id !== id);
+      reindexOrders();
+      save(); closeSheet(false); renderSchedule(); renderHome();
+    });
   }
 
   document.getElementById('addStep').addEventListener('click', () => {
@@ -937,10 +1503,7 @@
 
   document.getElementById('scheduleList').addEventListener('click', e => {
     const tid = e.target.dataset.toggleEdit;
-    if (tid) {
-      document.getElementById('edit-' + tid).classList.toggle('hidden');
-      return;
-    }
+    if (tid) { openStepSheet(tid); return; }
     const del = e.target.dataset.delStep;
     if (del) {
       if (!confirm('Delete this step?')) return;
@@ -950,60 +1513,29 @@
     }
   });
 
-  function onScheduleField(e) {
-    const t = e.target;
-    if (!t.dataset.sf) return;
-    const s = state.schedule.find(x => x.id === t.dataset.id);
-    if (!s) return;
-    let v = t.type === 'checkbox' ? t.checked : t.value;
-    if (t.dataset.sf === 'budget' || t.dataset.sf === 'actual') v = Number(t.value) || 0;
-    s[t.dataset.sf] = v;
-    // mirror driveway costs back
-    if (/driveway grading/i.test(s.title) && t.dataset.sf === 'budget') {
-      state.driveway.costBase = v;
-      document.getElementById('drvCostBase').value = v;
-    }
-    if (/driveway paving/i.test(s.title) && t.dataset.sf === 'budget') {
-      state.driveway.costPave = v;
-      document.getElementById('drvCostPave').value = v;
-    }
-    save();
-    // refresh summary bits without collapsing edit
-    renderHome();
-    const li = t.closest('li');
-    if (li && (t.dataset.sf === 'title' || t.dataset.sf === 'month' || t.dataset.sf === 'status' || t.dataset.sf === 'budget' || t.dataset.sf === 'actual' || t.dataset.sf === 'milestone' || t.dataset.sf === 'contingent')) {
-      const meta = li.querySelector('.meta');
-      const title = li.querySelector('.title');
-      if (title) title.textContent = s.title;
-      if (meta) meta.innerHTML = `${stepWhen(s)} · ${statusPill(s.status)}${flagsPills(s)} · budget <span class="money">$${(Number(s.budget)||0).toLocaleString()}</span>${s.contingent ? ' <em>(not in base)</em>' : ''} · actual <span class="money">$${(Number(s.actual)||0).toLocaleString()}</span>`;
-    }
-  }
-  document.getElementById('scheduleList').addEventListener('input', onScheduleField);
-  document.getElementById('scheduleList').addEventListener('change', onScheduleField);
-
   // Drag reorder
   let dragId = null;
   document.getElementById('scheduleList').addEventListener('dragstart', e => {
-    const li = e.target.closest('li[data-step]');
+    const li = e.target.closest('[data-step]');
     if (!li) return;
     dragId = li.dataset.step;
     e.dataTransfer.effectAllowed = 'move';
   });
   document.getElementById('scheduleList').addEventListener('dragover', e => {
     e.preventDefault();
-    const li = e.target.closest('li[data-step]');
+    const li = e.target.closest('[data-step]');
     if (!li || li.dataset.step === dragId) return;
-    li.style.borderTop = '2px solid var(--accent)';
+    li.style.boxShadow = 'inset 0 2px 0 var(--accent)';
   });
   document.getElementById('scheduleList').addEventListener('dragleave', e => {
-    const li = e.target.closest('li[data-step]');
-    if (li) li.style.borderTop = '';
+    const li = e.target.closest('[data-step]');
+    if (li) li.style.boxShadow = '';
   });
   document.getElementById('scheduleList').addEventListener('drop', e => {
     e.preventDefault();
-    const li = e.target.closest('li[data-step]');
+    const li = e.target.closest('[data-step]');
     if (!li || !dragId) return;
-    li.style.borderTop = '';
+    li.style.boxShadow = '';
     const targetId = li.dataset.step;
     if (targetId === dragId) return;
     const sorted = [...state.schedule].sort((a,b) => a.order - b.order);
@@ -1028,13 +1560,16 @@
     if (!state.ideas.length) { box.innerHTML = '<div class="empty">No ideas yet — add one</div>'; return; }
     const sorted = [...state.ideas].sort((a,b) => (b.created||0) - (a.created||0));
     box.innerHTML = sorted.map(idea => `
-      <div class="idea">
-        <textarea data-idea="${idea.id}">${esc(idea.text)}</textarea>
-        <div class="row" style="margin-top:6px;justify-content:space-between">
-          <span class="when">${idea.created ? new Date(idea.created).toLocaleString() : ''}</span>
-          <button type="button" class="ghost sm" data-del-idea="${idea.id}">Delete</button>
+      <div class="swipe-host">
+        <div class="swipe-actions"><button type="button" data-del-idea="${idea.id}">Delete</button></div>
+        <div class="swipe-row idea">
+          <textarea data-idea="${idea.id}" placeholder="New idea…">${esc(idea.text)}</textarea>
+          <div style="margin-top:6px">
+            <span class="when">${idea.created ? new Date(idea.created).toLocaleString() : ''}</span>
+          </div>
         </div>
       </div>`).join('');
+    bindSwipe(box);
   }
   document.getElementById('addIdea').addEventListener('click', () => {
     state.ideas.unshift({ id: uid(), text: '', created: Date.now() });
@@ -1070,7 +1605,7 @@
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result);
-        state = { ...defaults(), ...data, lot: { ...defaults().lot, ...(data.lot||{}) }, lotRofr: { ...defaults().lotRofr, ...(data.lotRofr||{}) }, driveway: { ...defaults().driveway, ...(data.driveway||{}) } };
+        state = mergeState(data);
         save(); renderAll();
         alert('Imported.');
       } catch (err) {
@@ -1114,6 +1649,7 @@
 
   renderAll();
 })();
+
 </script>
 </body>
 </html>
