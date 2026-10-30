@@ -147,7 +147,7 @@
 <body>
 <header class="app">
   <h1>Clarence Ct Build</h1>
-  <p class="sub">Lot 28630 · Spring 2027 start · Back Forty plan (~80%)</p>
+  <p class="sub">Build on 28630 · ROFR on 28642 · Spring 2027 · Back Forty (~80%)</p>
 </header>
 
 <div class="wrap">
@@ -180,8 +180,9 @@
     <div class="card">
       <h2>Quick facts</h2>
       <div class="row">
-        <span class="pill">Build site: <strong style="margin-left:4px">Lot 28630</strong></span>
-        <span class="pill">Neighbor: 28642</span>
+        <span class="pill">Build site: <strong style="margin-left:4px">28630</strong></span>
+        <span class="pill">ROFR option: 28642</span>
+        <span class="pill">Combined if acquired: ~2.83 ac</span>
         <span class="pill">Plan: 103′ × 68′ BF1</span>
         <span class="pill">Target start: Apr 2027</span>
       </div>
@@ -218,14 +219,16 @@
   <!-- LOT -->
   <section id="panel-lot" class="panel">
     <div class="card">
-      <h2>Lot 28630 — build site</h2>
-      <p class="muted">Stearns County Datafi (wsbeng) parcel map. Build site: <strong>28630 Clarence Ct</strong>, Paynesville (Koronis Ridge). Neighbor only: <strong>28642 Clarence Ct</strong>.</p>
-      <img class="lot-img" src="assets/lot-map.jpg" alt="Lot 28630 build site map with proposed driveway" data-full="assets/lot-map.jpg" />
+      <h2>Lots — Clarence Ct (Koronis Ridge)</h2>
+      <p class="muted">House build is <strong>solely on 28630</strong>. Lot <strong>28642</strong> is under a <strong>right of first refusal</strong> (future option) — include it in planning, but not as the house site. Combined if acquired: <strong>~2.83 ac</strong> (1.38 + 1.45).</p>
+      <img class="lot-img" src="assets/lot-map.jpg" alt="28630 build site and 28642 ROFR option map" data-full="assets/lot-map.jpg" />
+      <p class="muted" style="margin-top:8px">Map: amber = build site 28630 · teal = ROFR option 28642</p>
     </div>
     <div class="card">
-      <h2>Parcel details</h2>
-      <p class="muted">Pre-filled from public Stearns County GIS where found. Blank fields were not in the layers we queried — fill those in from survey / builder. All fields stay editable.</p>
+      <h2>28630 — Build site</h2>
+      <p class="muted">Pre-filled from Stearns County GIS. House / driveway go here only. Fields stay editable.</p>
       <div class="grid2" id="lotFields"></div>
+      <p class="muted" id="combinedAcres" style="margin-top:10px"></p>
       <p class="muted" style="margin-top:12px;line-height:1.45" id="lotSource">
         <strong>Sources:</strong>
         Stearns County GIS hub
@@ -239,6 +242,11 @@
         Property Viewer / Datafi:
         <a href="https://datafi.wsbeng.com/#!prod/county!mn!stearns!public" target="_blank" rel="noopener">datafi.wsbeng.com</a>.
       </p>
+    </div>
+    <div class="card">
+      <h2>28642 — Right of first refusal (future option)</h2>
+      <p class="muted">Not the house build site. Track ROFR terms and possible future uses. GIS fields pre-filled; ROFR fields are yours to fill.</p>
+      <div class="grid2" id="rofrFields"></div>
     </div>
     <div class="card">
       <h2>Driveway</h2>
@@ -315,7 +323,7 @@
 
 <script>
 (function () {
-  const STORE_KEY = 'clarence-ct-build-v3';
+  const STORE_KEY = 'clarence-ct-build-v4';
   const CIRC = 2 * Math.PI * 40;
 
   const LOT_FIELD_DEFS = [
@@ -330,15 +338,28 @@
     { key: 'plat', label: 'Plat / lot / block', placeholder: '' },
     { key: 'sectwprange', label: 'Section–Township–Range', placeholder: '' },
     { key: 'owner', label: 'Owner (public tax record)', placeholder: '' },
-    { key: 'neighborParcel', label: 'Neighbor address #', placeholder: '28642' },
-    { key: 'neighborPin', label: 'Neighbor tax parcel / PIN', placeholder: '' },
-    { key: 'neighborNote', label: 'Neighbor context', placeholder: '' },
     { key: 'setbacks', label: 'Setbacks (F/S/R)', placeholder: 'not in GIS — confirm with county/builder' },
     { key: 'well', label: 'Well', placeholder: 'existing / new / TBD' },
     { key: 'septic', label: 'Septic / sewer', placeholder: '' },
     { key: 'utilities', label: 'Utilities (power, gas, internet)', placeholder: '' },
     { key: 'survey', label: 'Survey status', placeholder: '' },
     { key: 'topoNote', label: 'Topo / driveway grade note (USGS estimate)', placeholder: '' },
+  ];
+
+  const ROFR_FIELD_DEFS = [
+    { key: 'address', label: 'Address', placeholder: '' },
+    { key: 'parcelId', label: 'Address # (map label)', placeholder: '28642' },
+    { key: 'pin', label: 'Tax parcel / PIN', placeholder: '' },
+    { key: 'parcelNum', label: 'Parcel number', placeholder: '' },
+    { key: 'acreage', label: 'Deed acreage', placeholder: '' },
+    { key: 'zoning', label: 'Zoning', placeholder: '' },
+    { key: 'propClass', label: 'Property class', placeholder: '' },
+    { key: 'plat', label: 'Plat / lot / block', placeholder: '' },
+    { key: 'owner', label: 'Owner (public tax record)', placeholder: '' },
+    { key: 'status', label: 'ROFR status', placeholder: 'active / watching / exercised / expired' },
+    { key: 'terms', label: 'Terms / expiration date', placeholder: '' },
+    { key: 'price', label: 'Price / offer notes', placeholder: '' },
+    { key: 'notes', label: 'ROFR notes', placeholder: 'Uses if acquired: privacy buffer, shop, garden…' },
   ];
 
   const GRADE_PRESETS = [
@@ -354,6 +375,7 @@
   function defaultSchedule() {
     // Typical MN custom-home cadence; spring 2027 start
     const steps = [
+      { title: 'ROFR decision / review (28642)', month: '', status: 'todo', budget: 0, actual: 0, notes: 'Right of first refusal on 28642 — optional; house build stays on 28630 only' },
       { title: 'Finalize plan & selections', month: '2027-04', status: 'todo', budget: 5000, actual: 0, notes: 'BF1 is ~80% — lock changes with designer/builder' },
       { title: 'Site survey & soil / perc', month: '2027-04', status: 'todo', budget: 3500, actual: 0, notes: 'Confirm topography for driveway grade on 28630 (working estimate 10%)' },
       { title: 'Permits & county approvals', month: '2027-05', status: 'todo', budget: 4000, actual: 0, notes: 'Stearns County building, driveway/access, septic if needed' },
@@ -397,15 +419,27 @@
         plat: 'Koronis Ridge — Lot 003, Block 003',
         sectwprange: '21-122-32',
         owner: 'KOCKA LP',
-        neighborParcel: '28642',
-        neighborPin: '26163000004',
-        neighborNote: '28642 Clarence Ct — Koronis Ridge Lot 002 Blk 003; 1.45 ac; same public owner; neighboring lot only (not the build site)',
         setbacks: '',
         well: '',
         septic: '',
         utilities: '',
         survey: '',
         topoNote: 'USGS 3DEP (~1 m): cul-de-sac ~1176 ft; interior garage area ~1161 ft — rough sample path ~147 ft run / ~15 ft drop ≈ 10% downhill into the lot. Working driveway grade default ~10% (estimate pending survey). Will update after survey.',
+      },
+      lotRofr: {
+        address: '28642 Clarence Ct, Paynesville, MN 56362',
+        parcelId: '28642',
+        pin: '26163000004',
+        parcelNum: '26.16300.0004',
+        acreage: '1.45',
+        zoning: 'Residential District R-5',
+        propClass: '4B4 Unimproved residential land',
+        plat: 'Koronis Ridge — Lot 002, Block 003',
+        owner: 'KOCKA LP',
+        status: 'active ROFR',
+        terms: '',
+        price: '',
+        notes: 'Right of first refusal — future option. House build stays on 28630 only.',
       },
       driveway: {
         surface: 'paved',
@@ -421,6 +455,7 @@
         { id: uid(), text: 'Garage gym layout (racks, rubber floor, HVAC).', created: Date.now() },
         { id: uid(), text: 'Office/library built-ins and natural light.', created: Date.now() },
         { id: uid(), text: 'Snow storage and plow turnaround at driveway top.', created: Date.now() },
+        { id: uid(), text: '28642 ROFR — possible uses if acquired: privacy buffer, detached shop, garden / orchard (house stays on 28630).', created: Date.now() },
       ],
     };
   }
@@ -436,6 +471,7 @@
         ...d,
         ...data,
         lot: { ...d.lot, ...(data.lot || {}) },
+        lotRofr: { ...d.lotRofr, ...(data.lotRofr || {}) },
         driveway: { ...d.driveway, ...(data.driveway || {}) },
         planNotes: data.planNotes || d.planNotes,
         schedule: data.schedule || d.schedule,
@@ -556,18 +592,46 @@
   });
 
   // —— LOT ——
+  function combinedAcreageText() {
+    const a = parseFloat(state.lot.acreage) || 0;
+    const b = parseFloat(state.lotRofr && state.lotRofr.acreage) || 0;
+    const sum = a + b;
+    return 'Combined if 28642 acquired: ~' + sum.toFixed(2) + ' ac (28630 ' + (state.lot.acreage || '—') + ' + 28642 ' + ((state.lotRofr && state.lotRofr.acreage) || '—') + '). House build stays on 28630 only.';
+  }
+
   function renderLotFields() {
     const box = document.getElementById('lotFields');
     box.innerHTML = LOT_FIELD_DEFS.map(f => `
       <label class="field">${esc(f.label)}
         <input data-lot="${f.key}" value="${escAttr(state.lot[f.key] || '')}" placeholder="${escAttr(f.placeholder || '')}" />
       </label>`).join('');
+    const rofr = document.getElementById('rofrFields');
+    if (rofr) {
+      if (!state.lotRofr) state.lotRofr = defaults().lotRofr;
+      rofr.innerHTML = ROFR_FIELD_DEFS.map(f => `
+        <label class="field">${esc(f.label)}
+          <input data-rofr="${f.key}" value="${escAttr(state.lotRofr[f.key] || '')}" placeholder="${escAttr(f.placeholder || '')}" />
+        </label>`).join('');
+    }
+    const ca = document.getElementById('combinedAcres');
+    if (ca) ca.textContent = combinedAcreageText();
   }
   document.getElementById('lotFields').addEventListener('input', e => {
     const k = e.target.dataset.lot;
     if (!k) return;
     state.lot[k] = e.target.value;
     save();
+    const ca = document.getElementById('combinedAcres');
+    if (ca) ca.textContent = combinedAcreageText();
+  });
+  document.getElementById('rofrFields').addEventListener('input', e => {
+    const k = e.target.dataset.rofr;
+    if (!k) return;
+    if (!state.lotRofr) state.lotRofr = defaults().lotRofr;
+    state.lotRofr[k] = e.target.value;
+    save();
+    const ca = document.getElementById('combinedAcres');
+    if (ca) ca.textContent = combinedAcreageText();
   });
 
   function syncDrivewayInputs() {
@@ -663,7 +727,7 @@
     return `<span class="pill ${cls}">${esc(st)}</span>`;
   }
   function fmtMonth(ym) {
-    if (!ym) return '—';
+    if (!ym) return 'date TBD';
     const [y, m] = ym.split('-').map(Number);
     const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     return (names[m-1] || m) + ' ' + y;
@@ -848,7 +912,7 @@
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result);
-        state = { ...defaults(), ...data, lot: { ...defaults().lot, ...(data.lot||{}) }, driveway: { ...defaults().driveway, ...(data.driveway||{}) } };
+        state = { ...defaults(), ...data, lot: { ...defaults().lot, ...(data.lot||{}) }, lotRofr: { ...defaults().lotRofr, ...(data.lotRofr||{}) }, driveway: { ...defaults().driveway, ...(data.driveway||{}) } };
         save(); renderAll();
         alert('Imported.');
       } catch (err) {
