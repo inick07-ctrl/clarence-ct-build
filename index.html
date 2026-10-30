@@ -142,6 +142,27 @@
   .step-edit { display: grid; gap: 8px; margin-top: 8px; }
   .step-edit.hidden { display: none; }
   footer.tiny { text-align: center; color: var(--muted); font-size: .72rem; padding: 8px; }
+  .budget-card .cap-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 12px; }
+  .budget-bar {
+    height: 14px; border-radius: 999px; background: #e8dfd0; overflow: hidden;
+    position: relative; margin: 8px 0 4px;
+  }
+  .budget-bar > span {
+    display: block; height: 100%; border-radius: 999px; background: var(--good);
+    transition: width .25s ease;
+  }
+  .budget-bar.over > span { background: var(--bad); }
+  .budget-bar.warn > span { background: var(--warn); }
+  .budget-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;
+  }
+  @media (max-width: 640px) { .budget-grid { grid-template-columns: 1fr 1fr; } }
+  .budget-grid .stat strong { font-size: 1.05rem; }
+  .toggle-row {
+    display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted);
+    margin-top: 8px;
+  }
+  .toggle-row input { width: auto; }
 </style>
 </head>
 <body>
@@ -168,8 +189,7 @@
           <div>
             <div class="stat"><strong id="doneCount">0</strong> steps done</div>
             <div class="stat muted" id="remainCount">0 remaining</div>
-            <div class="stat muted money" id="budgetSummary">Budget —</div>
-            <div class="stat muted money" id="budgetWithRofr" style="margin-top:4px"></div>
+            <div class="stat muted" id="capGlance">Cap —</div>
           </div>
         </div>
         <div>
@@ -177,6 +197,29 @@
           <ul class="list" id="upcomingList"></ul>
         </div>
       </div>
+    </div>
+    <div class="card budget-card">
+      <h2>Budget cap</h2>
+      <p class="muted">Base build target. 28642 ROFR stays separate (not under this cap).</p>
+      <div class="cap-row">
+        <label class="field" style="max-width:200px">Cap ($)
+          <input type="number" id="budgetCap" min="0" step="1000" />
+        </label>
+        <label class="toggle-row" style="margin:0 0 10px">
+          <input type="checkbox" id="capIncludesLand" />
+          Cap includes land ($55k on 28630) — default on, confirm with Nick
+        </label>
+      </div>
+      <div class="budget-grid">
+        <div class="stat"><strong id="capVal">—</strong><span class="muted">Cap</span></div>
+        <div class="stat"><strong id="plannedVal">—</strong><span class="muted">Planned</span></div>
+        <div class="stat"><strong id="actualVal">—</strong><span class="muted">Actual spent</span></div>
+        <div class="stat"><strong id="remainVal">—</strong><span class="muted" id="remainLabel">Remaining</span></div>
+      </div>
+      <div class="budget-bar" id="budgetBar"><span id="budgetBarFill" style="width:0%"></span></div>
+      <div class="muted money" id="budgetBarLabel">—</div>
+      <div class="stat muted money" id="budgetSummary" style="margin-top:10px">Budget —</div>
+      <div class="stat muted money" id="budgetWithRofr" style="margin-top:4px"></div>
     </div>
     <div class="card">
       <h2>Quick facts</h2>
@@ -187,6 +230,7 @@
         <span class="pill">28630 land $55k · close Jan 15, 2027</span>
         <span class="pill">28642 ROFR $45k contingent</span>
         <span class="pill">Plan: 103′ × 68′ BF1</span>
+        <span class="pill">Base cap $350k</span>
         <span class="pill">Target start: Apr 2027</span>
       </div>
       <p class="muted" style="margin-top:10px">Data saves on this phone (localStorage). Use Export JSON for a backup.</p>
@@ -326,7 +370,7 @@
 
 <script>
 (function () {
-  const STORE_KEY = 'clarence-ct-build-v5';
+  const STORE_KEY = 'clarence-ct-build-v6';
   const CIRC = 2 * Math.PI * 40;
 
   const LOT_FIELD_DEFS = [
@@ -459,6 +503,8 @@
         costPave: 18000,
         notes: 'From cul-de-sac into garage on lot 28630 (downhill into lot per USGS). Working grade ~10% — estimate pending survey; will update after survey.',
       },
+      budgetCap: 350000,
+      capIncludesLand: true,
       schedule: defaultSchedule(),
       ideas: [
         { id: uid(), text: 'Garage gym layout (racks, rubber floor, HVAC).', created: Date.now() },
@@ -482,6 +528,8 @@
         lot: { ...d.lot, ...(data.lot || {}) },
         lotRofr: { ...d.lotRofr, ...(data.lotRofr || {}) },
         driveway: { ...d.driveway, ...(data.driveway || {}) },
+        budgetCap: data.budgetCap != null ? data.budgetCap : d.budgetCap,
+        capIncludesLand: data.capIncludesLand != null ? data.capIncludesLand : d.capIncludesLand,
         planNotes: data.planNotes || d.planNotes,
         schedule: data.schedule || d.schedule,
         ideas: data.ideas || d.ideas,
@@ -534,19 +582,69 @@
     document.getElementById('remainCount').textContent = (total - done) + ' remaining';
     const baseSteps = steps.filter(s => !s.contingent);
     const contSteps = steps.filter(s => s.contingent);
-    const budget = baseSteps.reduce((n, s) => n + (Number(s.budget) || 0), 0);
-    const actual = baseSteps.reduce((n, s) => n + (Number(s.actual) || 0), 0);
+    const isLandStep = (s) => !!(s.milestone && /Close on lot 28630/i.test(s.title));
+    const landPlanned = baseSteps.filter(isLandStep).reduce((n, s) => n + (Number(s.budget) || 0), 0)
+      || Number(String((state.lot && state.lot.purchasePrice) || '').replace(/[^0-9.]/g, '')) || 0;
+    const landActual = baseSteps.filter(isLandStep).reduce((n, s) => n + (Number(s.actual) || 0), 0);
+    const fullPlanned = baseSteps.reduce((n, s) => n + (Number(s.budget) || 0), 0);
+    const fullActual = baseSteps.reduce((n, s) => n + (Number(s.actual) || 0), 0);
+    const includeLand = state.capIncludesLand !== false;
+    const planned = includeLand ? fullPlanned : Math.max(0, fullPlanned - landPlanned);
+    const actual = includeLand ? fullActual : Math.max(0, fullActual - landActual);
+    const cap = Number(state.budgetCap) || 0;
+    const remaining = cap - planned;
     const contBudget = contSteps.reduce((n, s) => n + (Number(s.budget) || 0), 0);
-    // Prefer explicit ROFR price field if set
     const rofrPrice = Number(String((state.lotRofr && state.lotRofr.price) || '').replace(/[^0-9.]/g, '')) || contBudget;
     const drv = (Number(state.driveway.costBase)||0) + (Number(state.driveway.costPave)||0);
+
+    const capInput = document.getElementById('budgetCap');
+    const landToggle = document.getElementById('capIncludesLand');
+    if (capInput && document.activeElement !== capInput) capInput.value = cap;
+    if (landToggle && document.activeElement !== landToggle) landToggle.checked = includeLand;
+
+    document.getElementById('capVal').textContent = '$' + cap.toLocaleString();
+    document.getElementById('plannedVal').textContent = '$' + planned.toLocaleString();
+    document.getElementById('actualVal').textContent = '$' + actual.toLocaleString();
+    const remainEl = document.getElementById('remainVal');
+    const remainLabel = document.getElementById('remainLabel');
+    if (remaining >= 0) {
+      remainEl.textContent = '$' + remaining.toLocaleString();
+      remainEl.style.color = 'var(--good)';
+      if (remainLabel) remainLabel.textContent = 'Under cap';
+    } else {
+      remainEl.textContent = '$' + Math.abs(remaining).toLocaleString();
+      remainEl.style.color = 'var(--bad)';
+      if (remainLabel) remainLabel.textContent = 'Over cap';
+    }
+
+    const pctUsed = cap > 0 ? Math.min(100, (planned / cap) * 100) : 0;
+    const bar = document.getElementById('budgetBar');
+    const fill = document.getElementById('budgetBarFill');
+    fill.style.width = pctUsed + '%';
+    bar.classList.remove('over', 'warn');
+    if (planned > cap) bar.classList.add('over');
+    else if (cap > 0 && planned / cap >= 0.9) bar.classList.add('warn');
+    document.getElementById('budgetBarLabel').textContent =
+      (planned > cap
+        ? 'Over by $' + (planned - cap).toLocaleString()
+        : 'Under by $' + Math.max(0, cap - planned).toLocaleString()) +
+      ' · planned ' + (cap ? Math.round((planned / cap) * 100) : 0) + '% of cap' +
+      (includeLand ? ' (incl. land)' : ' (excl. land)');
+
+    const glance = document.getElementById('capGlance');
+    if (glance) {
+      glance.textContent = 'Cap $' + cap.toLocaleString() + ' · planned $' + planned.toLocaleString() +
+        (remaining >= 0 ? ' · under $' + remaining.toLocaleString() : ' · over $' + Math.abs(remaining).toLocaleString());
+    }
+
     document.getElementById('budgetSummary').textContent =
-      'Base budget $' + budget.toLocaleString() + ' · Actual $' + actual.toLocaleString() +
+      'Schedule planned $' + fullPlanned.toLocaleString() + ' · Actual $' + fullActual.toLocaleString() +
+      ' · Land $' + landPlanned.toLocaleString() + (includeLand ? ' in cap' : ' excluded from cap') +
       ' · Driveway est. $' + drv.toLocaleString();
     const withEl = document.getElementById('budgetWithRofr');
     if (withEl) {
       withEl.textContent = 'With 28642 ROFR (contingent +$' + rofrPrice.toLocaleString() +
-        '): $' + (budget + rofrPrice).toLocaleString() + ' — ROFR not counted in base';
+        '): planned $' + (fullPlanned + rofrPrice).toLocaleString() + ' — ROFR not under the $350k cap';
     }
 
     const upcoming = steps.filter(s => s.status !== 'done').slice(0, 4);
@@ -982,6 +1080,15 @@
     reader.readAsText(file);
     e.target.value = '';
   });
+  document.getElementById('budgetCap').addEventListener('input', () => {
+    state.budgetCap = Number(document.getElementById('budgetCap').value) || 0;
+    save(); renderHome();
+  });
+  document.getElementById('capIncludesLand').addEventListener('change', () => {
+    state.capIncludesLand = document.getElementById('capIncludesLand').checked;
+    save(); renderHome();
+  });
+
   document.getElementById('btnReset').addEventListener('click', () => {
     if (!confirm('Reset all data to defaults? This clears edits on this device.')) return;
     state = defaults();
