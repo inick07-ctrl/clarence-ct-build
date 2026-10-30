@@ -219,13 +219,26 @@
   <section id="panel-lot" class="panel">
     <div class="card">
       <h2>Lot 28630 — build site</h2>
-      <p class="muted">Stearns County Datafi (wsbeng) parcel map. Lot <strong>28630</strong> is the build site. Lot <strong>28642</strong> is the neighboring parcel only.</p>
+      <p class="muted">Stearns County Datafi (wsbeng) parcel map. Build site: <strong>28630 Clarence Ct</strong>, Paynesville (Koronis Ridge). Neighbor only: <strong>28642 Clarence Ct</strong>.</p>
       <img class="lot-img" src="assets/lot-map.jpg" alt="Lot 28630 build site map with proposed driveway" data-full="assets/lot-map.jpg" />
     </div>
     <div class="card">
       <h2>Parcel details</h2>
-      <p class="muted">Fill these in from your survey / county / builder. Left blank on purpose.</p>
+      <p class="muted">Pre-filled from public Stearns County GIS where found. Blank fields were not in the layers we queried — fill those in from survey / builder. All fields stay editable.</p>
       <div class="grid2" id="lotFields"></div>
+      <p class="muted" style="margin-top:12px;line-height:1.45" id="lotSource">
+        <strong>Sources:</strong>
+        Stearns County GIS hub
+        (<a href="https://stearns-county-gis-stearns.hub.arcgis.com" target="_blank" rel="noopener">hub</a>)
+        · Parcels MapServer
+        (<a href="https://gis.co.stearns.mn.us/arcgis/rest/services/General/Parcels/MapServer/0" target="_blank" rel="noopener">REST</a>, queried Oct 30, 2026 America/Chicago)
+        · Zoning shapefile download “Zoning Districts – Oct 15, 2026”
+        (<a href="https://gis.co.stearns.mn.us/gisdata/zoning.zip" target="_blank" rel="noopener">zoning.zip</a>) → R-5 at site
+        · Elevation: USGS 3DEP via
+        <a href="https://epqs.nationalmap.gov/" target="_blank" rel="noopener">EPQS</a> (estimate only, not a survey).
+        Property Viewer / Datafi:
+        <a href="https://datafi.wsbeng.com/#!prod/county!mn!stearns!public" target="_blank" rel="noopener">datafi.wsbeng.com</a>.
+      </p>
     </div>
     <div class="card">
       <h2>Driveway</h2>
@@ -302,22 +315,30 @@
 
 <script>
 (function () {
-  const STORE_KEY = 'clarence-ct-build-v1';
+  const STORE_KEY = 'clarence-ct-build-v2';
   const CIRC = 2 * Math.PI * 40;
 
   const LOT_FIELD_DEFS = [
-    { key: 'parcelId', label: 'Parcel ID (build site)', placeholder: '28630' },
-    { key: 'neighborParcel', label: 'Neighboring parcel', placeholder: '28642' },
-    { key: 'address', label: 'Site address / road', placeholder: '' },
-    { key: 'acreage', label: 'Acreage', placeholder: '' },
+    { key: 'address', label: 'Site address', placeholder: '' },
+    { key: 'parcelId', label: 'Address # (map label)', placeholder: '28630' },
+    { key: 'pin', label: 'Tax parcel / PIN', placeholder: '' },
+    { key: 'parcelNum', label: 'Parcel number', placeholder: '' },
+    { key: 'acreage', label: 'Deed acreage', placeholder: '' },
     { key: 'zoning', label: 'Zoning', placeholder: '' },
-    { key: 'setbacks', label: 'Setbacks (F/S/R)', placeholder: '' },
+    { key: 'propClass', label: 'Property class', placeholder: '' },
+    { key: 'township', label: 'Township / tax authority', placeholder: '' },
+    { key: 'plat', label: 'Plat / lot / block', placeholder: '' },
+    { key: 'sectwprange', label: 'Section–Township–Range', placeholder: '' },
+    { key: 'owner', label: 'Owner (public tax record)', placeholder: '' },
+    { key: 'neighborParcel', label: 'Neighbor address #', placeholder: '28642' },
+    { key: 'neighborPin', label: 'Neighbor tax parcel / PIN', placeholder: '' },
+    { key: 'neighborNote', label: 'Neighbor context', placeholder: '' },
+    { key: 'setbacks', label: 'Setbacks (F/S/R)', placeholder: 'not in GIS — confirm with county/builder' },
     { key: 'well', label: 'Well', placeholder: 'existing / new / TBD' },
     { key: 'septic', label: 'Septic / sewer', placeholder: '' },
     { key: 'utilities', label: 'Utilities (power, gas, internet)', placeholder: '' },
     { key: 'survey', label: 'Survey status', placeholder: '' },
-    { key: 'owner', label: 'Owner / entity', placeholder: '' },
-    { key: 'pin', label: 'County PIN / tax ID', placeholder: '' },
+    { key: 'topoNote', label: 'Topo / driveway grade note (USGS estimate)', placeholder: '' },
   ];
 
   const GRADE_PRESETS = [
@@ -365,18 +386,26 @@
         { id: uid(), text: 'Confirm garage stall depths and door count with builder.', done: false },
       ],
       lot: {
+        address: '28630 Clarence Ct, Paynesville, MN 56362',
         parcelId: '28630',
+        pin: '26163000005',
+        parcelNum: '26.16300.0005',
+        acreage: '1.38',
+        zoning: 'Residential District R-5',
+        propClass: '4B4 Unimproved residential land',
+        township: 'Paynesville Twp (tax auth 2605 / ISD 741)',
+        plat: 'Koronis Ridge — Lot 003, Block 003',
+        sectwprange: '21-122-32',
+        owner: 'KOCKA LP',
         neighborParcel: '28642',
-        address: '',
-        acreage: '',
-        zoning: '',
+        neighborPin: '26163000004',
+        neighborNote: '28642 Clarence Ct — Koronis Ridge Lot 002 Blk 003; 1.45 ac; same public owner; neighboring lot only (not the build site)',
         setbacks: '',
         well: '',
         septic: '',
         utilities: '',
         survey: '',
-        owner: '',
-        pin: '',
+        topoNote: 'USGS 3DEP (~1 m): cul-de-sac ~1176 ft; interior garage area ~1161 ft — rough sample path ~147 ft run / ~15 ft drop ≈ 10% downhill into the lot. Nick’s working estimate ~15%. Verify with survey before design.',
       },
       driveway: {
         surface: 'paved',
@@ -385,7 +414,7 @@
         width: '12',
         costBase: 12000,
         costPave: 18000,
-        notes: 'From cul-de-sac road up to garage on lot 28630. Grade estimate ~15% — verify with survey.',
+        notes: 'From cul-de-sac into garage on lot 28630 (downhill into lot per USGS). Working grade ~15% (editable). USGS sample ~10% over ~147 ft — verify with survey.',
       },
       schedule: defaultSchedule(),
       ideas: [
