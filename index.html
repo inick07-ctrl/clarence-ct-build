@@ -242,7 +242,7 @@
     </div>
     <div class="card">
       <h2>Driveway</h2>
-      <p class="muted">Paved driveway from the cul-de-sac up to the garage on lot 28630. Grade is editable — defaulting to Nick’s ~15% estimate.</p>
+      <p class="muted">Paved driveway from the cul-de-sac up to the garage on lot 28630. Grade is editable — defaulting to ~10% (estimate pending survey).</p>
       <div class="grid2">
         <label class="field">Surface
           <select id="drvSurface"></select>
@@ -315,7 +315,7 @@
 
 <script>
 (function () {
-  const STORE_KEY = 'clarence-ct-build-v2';
+  const STORE_KEY = 'clarence-ct-build-v3';
   const CIRC = 2 * Math.PI * 40;
 
   const LOT_FIELD_DEFS = [
@@ -355,10 +355,10 @@
     // Typical MN custom-home cadence; spring 2027 start
     const steps = [
       { title: 'Finalize plan & selections', month: '2027-04', status: 'todo', budget: 5000, actual: 0, notes: 'BF1 is ~80% — lock changes with designer/builder' },
-      { title: 'Site survey & soil / perc', month: '2027-04', status: 'todo', budget: 3500, actual: 0, notes: 'Confirm topography for driveway grade on 28630' },
+      { title: 'Site survey & soil / perc', month: '2027-04', status: 'todo', budget: 3500, actual: 0, notes: 'Confirm topography for driveway grade on 28630 (working estimate 10%)' },
       { title: 'Permits & county approvals', month: '2027-05', status: 'todo', budget: 4000, actual: 0, notes: 'Stearns County building, driveway/access, septic if needed' },
       { title: 'Clearing & excavation', month: '2027-05', status: 'todo', budget: 18000, actual: 0, notes: 'Pad, basement/crawl as designed' },
-      { title: 'Driveway grading & base', month: '2027-05', status: 'todo', budget: 12000, actual: 0, notes: 'From cul-de-sac up to garage; verify ~15% grade with survey' },
+      { title: 'Driveway grading & base', month: '2027-05', status: 'todo', budget: 12000, actual: 0, notes: 'From cul-de-sac into garage; working ~10% grade — update after survey' },
       { title: 'Footings & foundation', month: '2027-06', status: 'todo', budget: 45000, actual: 0, notes: '' },
       { title: 'Framing', month: '2027-07', status: 'todo', budget: 85000, actual: 0, notes: '103×68 farmhouse shell' },
       { title: 'Roof dry-in', month: '2027-08', status: 'todo', budget: 28000, actual: 0, notes: '' },
@@ -405,16 +405,16 @@
         septic: '',
         utilities: '',
         survey: '',
-        topoNote: 'USGS 3DEP (~1 m): cul-de-sac ~1176 ft; interior garage area ~1161 ft — rough sample path ~147 ft run / ~15 ft drop ≈ 10% downhill into the lot. Nick’s working estimate ~15%. Verify with survey before design.',
+        topoNote: 'USGS 3DEP (~1 m): cul-de-sac ~1176 ft; interior garage area ~1161 ft — rough sample path ~147 ft run / ~15 ft drop ≈ 10% downhill into the lot. Working driveway grade default ~10% (estimate pending survey). Will update after survey.',
       },
       driveway: {
         surface: 'paved',
-        grade: 15,
+        grade: 10,
         length: '',
         width: '12',
         costBase: 12000,
         costPave: 18000,
-        notes: 'From cul-de-sac into garage on lot 28630 (downhill into lot per USGS). Working grade ~15% (editable). USGS sample ~10% over ~147 ft — verify with survey.',
+        notes: 'From cul-de-sac into garage on lot 28630 (downhill into lot per USGS). Working grade ~10% — estimate pending survey; will update after survey.',
       },
       schedule: defaultSchedule(),
       ideas: [
