@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#3d2b1f" />
+<title>Clarence Ct Build Tracker</title>
+<style>
+  :root {
+    --bg: #f4efe6;
+    --bg2: #ebe3d5;
+    --card: #fffcf7;
+    --ink: #2c2118;
+    --muted: #6b5a4a;
+    --accent: #8b5e3c;
+    --accent2: #c4a574;
+    --good: #3d6b4f;
+    --warn: #9a5b1f;
+    --bad: #8b3a2f;
+    --line: #d9cbb8;
+    --shadow: 0 8px 24px rgba(44,33,24,.08);
+    --radius: 14px;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  body { padding-bottom: calc(72px + var(--safe-b)); }
+  header.app {
+    position: sticky; top: 0; z-index: 40;
+    background: linear-gradient(180deg, #3d2b1f 0%, #4a3426 100%);
+    color: #f8f0e4; padding: 14px 16px 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  }
+  header.app h1 { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: .02em; }
+  header.app .sub { margin: 4px 0 0; font-size: .78rem; opacity: .85; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 14px 14px 28px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 14px 14px 16px; margin-bottom: 14px;
+  }
+  .card h2 { margin: 0 0 10px; font-size: 1.05rem; color: var(--accent); }
+  .card h3 { margin: 14px 0 8px; font-size: .95rem; }
+  .muted { color: var(--muted); font-size: .85rem; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+  label.field { display: flex; flex-direction: column; gap: 4px; font-size: .78rem; color: var(--muted); flex: 1; min-width: 140px; }
+  input, select, textarea {
+    font: inherit; color: var(--ink); background: #fff; border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 12px; width: 100%;
+  }
+  textarea { min-height: 80px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent2); border-color: var(--accent); }
+  button, .btn {
+    appearance: none; border: none; cursor: pointer; font: inherit; font-weight: 600;
+    border-radius: 10px; padding: 10px 14px; background: var(--accent); color: #fff;
+  }
+  button.ghost, .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+  button.danger { background: var(--bad); }
+  button.sm { padding: 7px 10px; font-size: .8rem; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+    font-size: .75rem; font-weight: 600; background: var(--bg2); color: var(--muted);
+  }
+  .pill.done { background: #dceadf; color: var(--good); }
+  .pill.active { background: #f3e4c8; color: var(--warn); }
+  .pill.todo { background: #eee8df; color: var(--muted); }
+  .pill.blocked { background: #f3d9d4; color: var(--bad); }
+  .dash {
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;
+  }
+  @media (max-width: 640px) { .dash { grid-template-columns: 1fr; } }
+  .progress-ring-wrap { display: flex; align-items: center; gap: 14px; }
+  .progress-ring { width: 88px; height: 88px; position: relative; }
+  .progress-ring svg { transform: rotate(-90deg); }
+  .progress-ring .pct {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-size: 1.25rem; font-weight: 800; color: var(--accent);
+  }
+  .stat { font-size: .85rem; }
+  .stat strong { display: block; font-size: 1.1rem; color: var(--ink); }
+  .tabs {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    background: #fffdf9; border-top: 1px solid var(--line);
+    padding-bottom: var(--safe-b); box-shadow: 0 -6px 20px rgba(0,0,0,.06);
+  }
+  .tabs button {
+    background: transparent; color: var(--muted); border-radius: 0; padding: 10px 4px 8px;
+    font-size: .68rem; font-weight: 600; display: flex; flex-direction: column; gap: 2px; align-items: center;
+  }
+  .tabs button.active { color: var(--accent); }
+  .tabs .ico { font-size: 1.15rem; line-height: 1; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .plan-img, .lot-img {
+    width: 100%; border-radius: 12px; border: 1px solid var(--line); background: #fff;
+    display: block; cursor: zoom-in;
+  }
+  .lightbox {
+    display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.88);
+    align-items: center; justify-content: center; padding: 12px;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+  .list { list-style: none; margin: 0; padding: 0; }
+  .list li {
+    background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+    margin-bottom: 8px;
+  }
+  .list li .top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+  .list li .title { font-weight: 700; font-size: .95rem; }
+  .list li .meta { font-size: .78rem; color: var(--muted); margin-top: 4px; }
+  .money { font-variant-numeric: tabular-nums; }
+  .caution {
+    background: #f8ebe3; border: 1px solid #e2b89a; color: #7a3d1c;
+    border-radius: 12px; padding: 12px; font-size: .85rem; margin: 10px 0;
+  }
+  .caution.hidden { display: none; }
+  .grade-board {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px;
+  }
+  @media (max-width: 700px) { .grade-board { grid-template-columns: 1fr 1fr; } }
+  .grade-card {
+    border: 2px solid var(--line); border-radius: 12px; padding: 8px; background: #fff;
+    cursor: pointer; text-align: center; transition: .15s ease;
+  }
+  .grade-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,94,60,.18); background: #fff8ef; }
+  .grade-card .g { font-weight: 800; font-size: 1rem; color: var(--accent); }
+  .grade-card .note { font-size: .68rem; color: var(--muted); margin-top: 4px; line-height: 1.25; }
+  .grade-card svg { width: 100%; height: 54px; display: block; margin: 4px 0; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .idea-board { display: grid; gap: 8px; }
+  .idea {
+    border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: #fff;
+  }
+  .idea .when { font-size: .72rem; color: var(--muted); }
+  .empty { text-align: center; color: var(--muted); padding: 18px; font-size: .9rem; }
+  .drag-handle { cursor: grab; color: var(--muted); user-select: none; padding: 0 4px; }
+  .step-edit { display: grid; gap: 8px; margin-top: 8px; }
+  .step-edit.hidden { display: none; }
+  footer.tiny { text-align: center; color: var(--muted); font-size: .72rem; padding: 8px; }
+</style>
+</head>
+<body>
+<header class="app">
+  <h1>Clarence Ct Build</h1>
+  <p class="sub">Lot 28630 · Spring 2027 start · Back Forty plan (~80%)</p>
+</header>
+
+<div class="wrap">
+  <!-- DASH / HOME -->
+  <section id="panel-home" class="panel active">
+    <div class="card">
+      <h2>Progress</h2>
+      <div class="dash">
+        <div class="progress-ring-wrap">
+          <div class="progress-ring">
+            <svg viewBox="0 0 100 100" width="88" height="88" aria-hidden="true">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#e8dfd0" stroke-width="10"/>
+              <circle id="ringArc" cx="50" cy="50" r="40" fill="none" stroke="#8b5e3c" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+            </svg>
+            <div class="pct" id="pctLabel">0%</div>
+          </div>
+          <div>
+            <div class="stat"><strong id="doneCount">0</strong> steps done</div>
+            <div class="stat muted" id="remainCount">0 remaining</div>
+            <div class="stat muted money" id="budgetSummary">Budget —</div>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin-top:0">Up next</h3>
+          <ul class="list" id="upcomingList"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Quick facts</h2>
+      <div class="row">
+        <span class="pill">Build site: <strong style="margin-left:4px">Lot 28630</strong></span>
+        <span class="pill">Neighbor: 28642</span>
+        <span class="pill">Plan: 103′ × 68′ BF1</span>
+        <span class="pill">Target start: Apr 2027</span>
+      </div>
+      <p class="muted" style="margin-top:10px">Data saves on this phone (localStorage). Use Export JSON for a backup.</p>
+      <div class="toolbar" style="margin-top:8px">
+        <button type="button" class="ghost sm" id="btnExport">Export JSON</button>
+        <button type="button" class="ghost sm" id="btnImport">Import JSON</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden />
+        <button type="button" class="ghost sm danger" id="btnReset" style="color:var(--bad)">Reset defaults</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLAN -->
+  <section id="panel-plan" class="panel">
+    <div class="card">
+      <h2>Floor plan</h2>
+      <p class="muted">Back Forty Building Co. style layout — about <strong>80%</strong> of what you want. Overall ~103′ × 68′. Latest edit (BF1): office/library next to bedroom 2 + 12×12 gym east of the mech room in the garage.</p>
+      <h3>Your working plan (BF1)</h3>
+      <img class="plan-img" src="assets/plan-bf1.jpg" alt="BF1 farmhouse floor plan" data-full="assets/plan-bf1.jpg" />
+      <h3>Original reference</h3>
+      <img class="plan-img" src="assets/plan-ref.jpg" alt="Back Forty reference plan" data-full="assets/plan-ref.jpg" />
+    </div>
+    <div class="card">
+      <h2>Plan notes &amp; changes</h2>
+      <p class="muted">Track what still needs to change from the ~80% plan.</p>
+      <div class="toolbar">
+        <button type="button" class="sm" id="addPlanNote">+ Add note</button>
+      </div>
+      <ul class="list" id="planNotes"></ul>
+    </div>
+  </section>
+
+  <!-- LOT -->
+  <section id="panel-lot" class="panel">
+    <div class="card">
+      <h2>Lot 28630 — build site</h2>
+      <p class="muted">Stearns County Datafi (wsbeng) parcel map. Lot <strong>28630</strong> is the build site. Lot <strong>28642</strong> is the neighboring parcel only.</p>
+      <img class="lot-img" src="assets/lot-map.jpg" alt="Lot 28630 build site map with proposed driveway" data-full="assets/lot-map.jpg" />
+    </div>
+    <div class="card">
+      <h2>Parcel details</h2>
+      <p class="muted">Fill these in from your survey / county / builder. Left blank on purpose.</p>
+      <div class="grid2" id="lotFields"></div>
+    </div>
+    <div class="card">
+      <h2>Driveway</h2>
+      <p class="muted">Paved driveway from the cul-de-sac up to the garage on lot 28630. Grade is editable — defaulting to Nick’s ~15% estimate.</p>
+      <div class="grid2">
+        <label class="field">Surface
+          <select id="drvSurface"></select>
+        </label>
+        <label class="field">Grade %
+          <input type="number" id="drvGrade" min="1" max="40" step="0.5" />
+        </label>
+        <label class="field">Length (ft) — TBD
+          <input type="text" id="drvLength" placeholder="e.g. 80" />
+        </label>
+        <label class="field">Width (ft)
+          <input type="text" id="drvWidth" placeholder="e.g. 12" />
+        </label>
+        <label class="field">Est. cost (grading + base)
+          <input type="number" id="drvCostBase" min="0" step="100" />
+        </label>
+        <label class="field">Est. cost (paving)
+          <input type="number" id="drvCostPave" min="0" step="100" />
+        </label>
+      </div>
+      <label class="field" style="margin-top:10px">Driveway notes
+        <textarea id="drvNotes" placeholder="Access path, turnaround, snow storage…"></textarea>
+      </label>
+
+      <h3>Grade comparison (side profile)</h3>
+      <p class="muted">Rise per 100 ft of run. Tap a card to set your driveway grade.</p>
+      <div class="grade-board" id="gradeBoard"></div>
+      <div class="caution hidden" id="gradeCaution">
+        <strong>Grade caution:</strong> Above ~15% is steeper than many county / fire-access comfort ranges (often ~10–15%). Confirm with Stearns County and your builder before locking this in — winter traction, emergency access, and vehicle clearance all matter.
+      </div>
+    </div>
+  </section>
+
+  <!-- SCHEDULE -->
+  <section id="panel-schedule" class="panel">
+    <div class="card">
+      <h2>Build schedule</h2>
+      <p class="muted">Month-by-month residential timeline starting spring (April) 2027 — Minnesota-aware. Edit dates, status, budget, and notes. Drag handle = reorder.</p>
+      <div class="toolbar">
+        <button type="button" class="sm" id="addStep">+ Add step</button>
+      </div>
+      <ul class="list" id="scheduleList"></ul>
+    </div>
+  </section>
+
+  <!-- IDEAS -->
+  <section id="panel-ideas" class="panel">
+    <div class="card">
+      <h2>Build ideas</h2>
+      <p class="muted">Dump ideas anytime — finishes, outdoor, garage gym, well/septic, landscaping…</p>
+      <div class="toolbar">
+        <button type="button" class="sm" id="addIdea">+ Add idea</button>
+      </div>
+      <div class="idea-board" id="ideaBoard"></div>
+    </div>
+  </section>
+
+  <footer class="tiny">Concept planning only — not construction drawings. Data stays on this device unless you export.</footer>
+</div>
+
+<nav class="tabs" aria-label="Main">
+  <button type="button" data-tab="home" class="active"><span class="ico">⌂</span>Home</button>
+  <button type="button" data-tab="plan"><span class="ico">▦</span>Plan</button>
+  <button type="button" data-tab="lot"><span class="ico">◇</span>Lot</button>
+  <button type="button" data-tab="schedule"><span class="ico">☰</span>Schedule</button>
+  <button type="button" data-tab="ideas"><span class="ico">✎</span>Ideas</button>
+</nav>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true"><img alt="" id="lightboxImg" /></div>
+
+<script>
+(function () {
+  const STORE_KEY = 'clarence-ct-build-v1';
+  const CIRC = 2 * Math.PI * 40;
+
+  const LOT_FIELD_DEFS = [
+    { key: 'parcelId', label: 'Parcel ID (build site)', placeholder: '28630' },
+    { key: 'neighborParcel', label: 'Neighboring parcel', placeholder: '28642' },
+    { key: 'address', label: 'Site address / road', placeholder: '' },
+    { key: 'acreage', label: 'Acreage', placeholder: '' },
+    { key: 'zoning', label: 'Zoning', placeholder: '' },
+    { key: 'setbacks', label: 'Setbacks (F/S/R)', placeholder: '' },
+    { key: 'well', label: 'Well', placeholder: 'existing / new / TBD' },
+    { key: 'septic', label: 'Septic / sewer', placeholder: '' },
+    { key: 'utilities', label: 'Utilities (power, gas, internet)', placeholder: '' },
+    { key: 'survey', label: 'Survey status', placeholder: '' },
+    { key: 'owner', label: 'Owner / entity', placeholder: '' },
+    { key: 'pin', label: 'County PIN / tax ID', placeholder: '' },
+  ];
+
+  const GRADE_PRESETS = [
+    { pct: 5, feel: 'Gentle. Easy walk & winter drive.', winter: 'Low concern' },
+    { pct: 10, feel: 'Noticeable incline. Common driveway.', winter: 'Manageable with care' },
+    { pct: 15, feel: 'Steep for daily use. County/fire edge.', winter: 'Needs grit / good tires' },
+    { pct: 20, feel: 'Very steep. Hard for trucks & trailers.', winter: 'Risky when icy' },
+    { pct: 30, feel: 'Extreme. Often not allowed for access.', winter: 'Impractical in MN winter' },
+  ];
+
+  function uid() { return 'id-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+
+  function defaultSchedule() {
+    // Typical MN custom-home cadence; spring 2027 start
+    const steps = [
+      { title: 'Finalize plan & selections', month: '2027-04', status: 'todo', budget: 5000, actual: 0, notes: 'BF1 is ~80% — lock changes with designer/builder' },
+      { title: 'Site survey & soil / perc', month: '2027-04', status: 'todo', budget: 3500, actual: 0, notes: 'Confirm topography for driveway grade on 28630' },
+      { title: 'Permits & county approvals', month: '2027-05', status: 'todo', budget: 4000, actual: 0, notes: 'Stearns County building, driveway/access, septic if needed' },
+      { title: 'Clearing & excavation', month: '2027-05', status: 'todo', budget: 18000, actual: 0, notes: 'Pad, basement/crawl as designed' },
+      { title: 'Driveway grading & base', month: '2027-05', status: 'todo', budget: 12000, actual: 0, notes: 'From cul-de-sac up to garage; verify ~15% grade with survey' },
+      { title: 'Footings & foundation', month: '2027-06', status: 'todo', budget: 45000, actual: 0, notes: '' },
+      { title: 'Framing', month: '2027-07', status: 'todo', budget: 85000, actual: 0, notes: '103×68 farmhouse shell' },
+      { title: 'Roof dry-in', month: '2027-08', status: 'todo', budget: 28000, actual: 0, notes: '' },
+      { title: 'Windows & exterior doors', month: '2027-08', status: 'todo', budget: 22000, actual: 0, notes: '' },
+      { title: 'MEP rough-in (mech/elec/plumb)', month: '2027-09', status: 'todo', budget: 55000, actual: 0, notes: 'Include garage gym / utilities room needs' },
+      { title: 'Rough inspections', month: '2027-09', status: 'todo', budget: 0, actual: 0, notes: '' },
+      { title: 'Insulation & air seal', month: '2027-10', status: 'todo', budget: 16000, actual: 0, notes: 'MN energy code' },
+      { title: 'Drywall', month: '2027-10', status: 'todo', budget: 24000, actual: 0, notes: '' },
+      { title: 'Interior finishes', month: '2027-11', status: 'todo', budget: 70000, actual: 0, notes: 'Trim, paint, flooring, cabinets, baths' },
+      { title: 'Exterior finishes & landscaping start', month: '2028-04', status: 'todo', budget: 30000, actual: 0, notes: 'After freeze — siding touch-up, grading, seed' },
+      { title: 'Driveway paving', month: '2028-05', status: 'todo', budget: 18000, actual: 0, notes: 'Asphalt or concrete after base settles; weather window' },
+      { title: 'Final inspections & CO', month: '2028-05', status: 'todo', budget: 1000, actual: 0, notes: '' },
+      { title: 'Punch list & move-in', month: '2028-06', status: 'todo', budget: 5000, actual: 0, notes: '' },
+    ];
+    return steps.map((s, i) => ({ id: uid(), order: i, ...s }));
+  }
+
+  function defaults() {
+    return {
+      version: 1,
+      planNotes: [
+        { id: uid(), text: 'Overall layout is about 80% of what we want — keep refining.', done: false },
+        { id: uid(), text: 'BF1: office/library next to bedroom 2.', done: true },
+        { id: uid(), text: 'BF1: 12×12 gym east of mech in garage.', done: true },
+        { id: uid(), text: 'Confirm garage stall depths and door count with builder.', done: false },
+      ],
+      lot: {
+        parcelId: '28630',
+        neighborParcel: '28642',
+        address: '',
+        acreage: '',
+        zoning: '',
+        setbacks: '',
+        well: '',
+        septic: '',
+        utilities: '',
+        survey: '',
+        owner: '',
+        pin: '',
+      },
+      driveway: {
+        surface: 'paved',
+        grade: 15,
+        length: '',
+        width: '12',
+        costBase: 12000,
+        costPave: 18000,
+        notes: 'From cul-de-sac road up to garage on lot 28630. Grade estimate ~15% — verify with survey.',
+      },
+      schedule: defaultSchedule(),
+      ideas: [
+        { id: uid(), text: 'Garage gym layout (racks, rubber floor, HVAC).', created: Date.now() },
+        { id: uid(), text: 'Office/library built-ins and natural light.', created: Date.now() },
+        { id: uid(), text: 'Snow storage and plow turnaround at driveway top.', created: Date.now() },
+      ],
+    };
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return defaults();
+      const data = JSON.parse(raw);
+      // soft-merge missing keys
+      const d = defaults();
+      return {
+        ...d,
+        ...data,
+        lot: { ...d.lot, ...(data.lot || {}) },
+        driveway: { ...d.driveway, ...(data.driveway || {}) },
+        planNotes: data.planNotes || d.planNotes,
+        schedule: data.schedule || d.schedule,
+        ideas: data.ideas || d.ideas,
+      };
+    } catch (e) {
+      return defaults();
+    }
+  }
+
+  let state = load();
+  let saveTimer = null;
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    }, 120);
+  }
+
+  // Tabs
+  document.querySelectorAll('.tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // Lightbox
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lightboxImg');
+  document.querySelectorAll('.plan-img, .lot-img').forEach(img => {
+    img.addEventListener('click', () => {
+      lbImg.src = img.dataset.full || img.src;
+      lb.classList.add('open');
+    });
+  });
+  lb.addEventListener('click', () => lb.classList.remove('open'));
+
+  // —— HOME ——
+  function renderHome() {
+    const steps = [...state.schedule].sort((a,b) => a.order - b.order);
+    const done = steps.filter(s => s.status === 'done').length;
+    const total = steps.length || 1;
+    const pct = Math.round((done / total) * 100);
+    document.getElementById('pctLabel').textContent = pct + '%';
+    document.getElementById('ringArc').style.strokeDashoffset = String(CIRC * (1 - pct / 100));
+    document.getElementById('doneCount').textContent = done;
+    document.getElementById('remainCount').textContent = (total - done) + ' remaining';
+    const budget = steps.reduce((n, s) => n + (Number(s.budget) || 0), 0);
+    const actual = steps.reduce((n, s) => n + (Number(s.actual) || 0), 0);
+    const drv = (Number(state.driveway.costBase)||0) + (Number(state.driveway.costPave)||0);
+    document.getElementById('budgetSummary').textContent =
+      'Budget $' + budget.toLocaleString() + ' · Actual $' + actual.toLocaleString() +
+      ' · Driveway est. $' + drv.toLocaleString();
+
+    const upcoming = steps.filter(s => s.status !== 'done').slice(0, 4);
+    const ul = document.getElementById('upcomingList');
+    if (!upcoming.length) {
+      ul.innerHTML = '<li class="empty">All steps marked done 🎉</li>';
+      return;
+    }
+    ul.innerHTML = upcoming.map(s => `
+      <li>
+        <div class="top">
+          <div>
+            <div class="title">${esc(s.title)}</div>
+            <div class="meta">${fmtMonth(s.month)} · ${statusPill(s.status)}</div>
+          </div>
+          <div class="money muted">$${(Number(s.budget)||0).toLocaleString()}</div>
+        </div>
+      </li>`).join('');
+  }
+
+  // —— PLAN NOTES ——
+  function renderPlanNotes() {
+    const ul = document.getElementById('planNotes');
+    if (!state.planNotes.length) {
+      ul.innerHTML = '<li class="empty">No notes yet</li>';
+      return;
+    }
+    ul.innerHTML = state.planNotes.map(n => `
+      <li>
+        <div class="top">
+          <label style="display:flex;gap:8px;align-items:flex-start;flex:1">
+            <input type="checkbox" data-note-done="${n.id}" ${n.done ? 'checked' : ''} style="margin-top:4px;width:auto" />
+            <input data-note-text="${n.id}" value="${escAttr(n.text)}" style="flex:1" />
+          </label>
+          <button type="button" class="ghost sm" data-note-del="${n.id}">✕</button>
+        </div>
+      </li>`).join('');
+  }
+  document.getElementById('addPlanNote').addEventListener('click', () => {
+    state.planNotes.unshift({ id: uid(), text: 'New plan change…', done: false });
+    save(); renderPlanNotes();
+  });
+  document.getElementById('planNotes').addEventListener('change', e => {
+    const t = e.target;
+    if (t.dataset.noteDone) {
+      const n = state.planNotes.find(x => x.id === t.dataset.noteDone);
+      if (n) { n.done = t.checked; save(); }
+    }
+  });
+  document.getElementById('planNotes').addEventListener('input', e => {
+    const t = e.target;
+    if (t.dataset.noteText) {
+      const n = state.planNotes.find(x => x.id === t.dataset.noteText);
+      if (n) { n.text = t.value; save(); }
+    }
+  });
+  document.getElementById('planNotes').addEventListener('click', e => {
+    const id = e.target.dataset.noteDel;
+    if (!id) return;
+    state.planNotes = state.planNotes.filter(x => x.id !== id);
+    save(); renderPlanNotes();
+  });
+
+  // —— LOT ——
+  function renderLotFields() {
+    const box = document.getElementById('lotFields');
+    box.innerHTML = LOT_FIELD_DEFS.map(f => `
+      <label class="field">${esc(f.label)}
+        <input data-lot="${f.key}" value="${escAttr(state.lot[f.key] || '')}" placeholder="${escAttr(f.placeholder || '')}" />
+      </label>`).join('');
+  }
+  document.getElementById('lotFields').addEventListener('input', e => {
+    const k = e.target.dataset.lot;
+    if (!k) return;
+    state.lot[k] = e.target.value;
+    save();
+  });
+
+  function syncDrivewayInputs() {
+    const d = state.driveway;
+    const sel = document.getElementById('drvSurface');
+    sel.innerHTML = ['paved','asphalt','concrete','gravel','other'].map(s =>
+      `<option value="${s}" ${d.surface===s?'selected':''}>${s}</option>`).join('');
+    document.getElementById('drvGrade').value = d.grade;
+    document.getElementById('drvLength').value = d.length;
+    document.getElementById('drvWidth').value = d.width;
+    document.getElementById('drvCostBase').value = d.costBase;
+    document.getElementById('drvCostPave').value = d.costPave;
+    document.getElementById('drvNotes').value = d.notes;
+    renderGradeBoard();
+    updateGradeCaution();
+  }
+
+  ['drvSurface','drvGrade','drvLength','drvWidth','drvCostBase','drvCostPave','drvNotes'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      state.driveway.surface = document.getElementById('drvSurface').value;
+      state.driveway.grade = Number(document.getElementById('drvGrade').value) || 0;
+      state.driveway.length = document.getElementById('drvLength').value;
+      state.driveway.width = document.getElementById('drvWidth').value;
+      state.driveway.costBase = Number(document.getElementById('drvCostBase').value) || 0;
+      state.driveway.costPave = Number(document.getElementById('drvCostPave').value) || 0;
+      state.driveway.notes = document.getElementById('drvNotes').value;
+      save();
+      renderGradeBoard();
+      updateGradeCaution();
+      renderHome();
+      // keep schedule driveway budget in sync if titles match
+      syncDrivewayBudgetSteps();
+    });
+  });
+
+  function syncDrivewayBudgetSteps() {
+    const base = state.schedule.find(s => /driveway grading/i.test(s.title));
+    const pave = state.schedule.find(s => /driveway paving/i.test(s.title));
+    if (base) base.budget = state.driveway.costBase;
+    if (pave) pave.budget = state.driveway.costPave;
+    save();
+  }
+
+  function updateGradeCaution() {
+    const el = document.getElementById('gradeCaution');
+    if (Number(state.driveway.grade) > 15) el.classList.remove('hidden');
+    else el.classList.add('hidden');
+  }
+
+  function gradeSvg(pct, selected) {
+    // side profile: 100 units run, rise = pct
+    const run = 100, rise = pct, pad = 8;
+    const scale = 0.9;
+    const w = 120, h = 54;
+    const x0 = pad, y0 = h - pad;
+    const x1 = w - pad;
+    const maxRiseDraw = 36; // visual cap so 30% still fits
+    const y1 = y0 - Math.min(maxRiseDraw, rise * (maxRiseDraw / 30));
+    const stroke = selected ? '#8b5e3c' : '#9a8b78';
+    return `<svg viewBox="0 0 ${w} ${h}" aria-hidden="true">
+      <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#d9cbb8" stroke-width="1"/>
+      <polygon points="${x0},${y0} ${x1},${y0} ${x1},${y1}" fill="${selected?'#f3e4c8':'#efe8dc'}" opacity=".9"/>
+      <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="${x1}" cy="${y1}" r="3" fill="${stroke}"/>
+    </svg>`;
+  }
+
+  function renderGradeBoard() {
+    const g = Number(state.driveway.grade) || 0;
+    const board = document.getElementById('gradeBoard');
+    board.innerHTML = GRADE_PRESETS.map(p => {
+      const angle = (Math.atan(p.pct / 100) * 180 / Math.PI).toFixed(1);
+      const selected = Math.abs(g - p.pct) < 0.51;
+      return `<div class="grade-card ${selected?'selected':''}" data-grade="${p.pct}" role="button" tabindex="0">
+        <div class="g">${p.pct}%</div>
+        ${gradeSvg(p.pct, selected)}
+        <div class="note"><strong>${p.pct} ft</strong> rise / 100 ft<br/>≈ ${angle}°<br/>${esc(p.feel)}<br/><em>${esc(p.winter)}</em></div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('gradeBoard').addEventListener('click', e => {
+    const card = e.target.closest('[data-grade]');
+    if (!card) return;
+    state.driveway.grade = Number(card.dataset.grade);
+    document.getElementById('drvGrade').value = state.driveway.grade;
+    save(); renderGradeBoard(); updateGradeCaution();
+  });
+
+  // —— SCHEDULE ——
+  function statusPill(st) {
+    const map = { todo: 'todo', active: 'active', done: 'done', blocked: 'blocked' };
+    const cls = map[st] || 'todo';
+    return `<span class="pill ${cls}">${esc(st)}</span>`;
+  }
+  function fmtMonth(ym) {
+    if (!ym) return '—';
+    const [y, m] = ym.split('-').map(Number);
+    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return (names[m-1] || m) + ' ' + y;
+  }
+
+  function renderSchedule() {
+    const ul = document.getElementById('scheduleList');
+    const steps = [...state.schedule].sort((a,b) => a.order - b.order);
+    if (!steps.length) { ul.innerHTML = '<li class="empty">No steps</li>'; return; }
+    ul.innerHTML = steps.map(s => `
+      <li data-step="${s.id}" draggable="true">
+        <div class="top">
+          <span class="drag-handle" title="Drag to reorder">⠿</span>
+          <div style="flex:1">
+            <div class="title">${esc(s.title)}</div>
+            <div class="meta">${fmtMonth(s.month)} · ${statusPill(s.status)} ·
+              budget <span class="money">$${(Number(s.budget)||0).toLocaleString()}</span>
+              · actual <span class="money">$${(Number(s.actual)||0).toLocaleString()}</span>
+            </div>
+          </div>
+          <button type="button" class="ghost sm" data-toggle-edit="${s.id}">Edit</button>
+        </div>
+        <div class="step-edit hidden" id="edit-${s.id}">
+          <label class="field">Title<input data-sf="title" data-id="${s.id}" value="${escAttr(s.title)}" /></label>
+          <div class="grid2">
+            <label class="field">Month<input type="month" data-sf="month" data-id="${s.id}" value="${escAttr(s.month||'')}" /></label>
+            <label class="field">Status
+              <select data-sf="status" data-id="${s.id}">
+                ${['todo','active','done','blocked'].map(o => `<option value="${o}" ${s.status===o?'selected':''}>${o}</option>`).join('')}
+              </select>
+            </label>
+            <label class="field">Budget $<input type="number" data-sf="budget" data-id="${s.id}" value="${Number(s.budget)||0}" /></label>
+            <label class="field">Actual $<input type="number" data-sf="actual" data-id="${s.id}" value="${Number(s.actual)||0}" /></label>
+          </div>
+          <label class="field">Notes<textarea data-sf="notes" data-id="${s.id}">${esc(s.notes||'')}</textarea></label>
+          <div class="row">
+            <button type="button" class="ghost sm danger" data-del-step="${s.id}">Delete step</button>
+          </div>
+        </div>
+      </li>`).join('');
+  }
+
+  document.getElementById('addStep').addEventListener('click', () => {
+    const order = state.schedule.reduce((m, s) => Math.max(m, s.order), -1) + 1;
+    state.schedule.push({
+      id: uid(), order, title: 'New step', month: '2027-04', status: 'todo',
+      budget: 0, actual: 0, notes: ''
+    });
+    save(); renderSchedule(); renderHome();
+  });
+
+  document.getElementById('scheduleList').addEventListener('click', e => {
+    const tid = e.target.dataset.toggleEdit;
+    if (tid) {
+      document.getElementById('edit-' + tid).classList.toggle('hidden');
+      return;
+    }
+    const del = e.target.dataset.delStep;
+    if (del) {
+      if (!confirm('Delete this step?')) return;
+      state.schedule = state.schedule.filter(s => s.id !== del);
+      reindexOrders();
+      save(); renderSchedule(); renderHome();
+    }
+  });
+
+  document.getElementById('scheduleList').addEventListener('input', e => {
+    const t = e.target;
+    if (!t.dataset.sf) return;
+    const s = state.schedule.find(x => x.id === t.dataset.id);
+    if (!s) return;
+    let v = t.value;
+    if (t.dataset.sf === 'budget' || t.dataset.sf === 'actual') v = Number(v) || 0;
+    s[t.dataset.sf] = v;
+    // mirror driveway costs back
+    if (/driveway grading/i.test(s.title) && t.dataset.sf === 'budget') {
+      state.driveway.costBase = v;
+      document.getElementById('drvCostBase').value = v;
+    }
+    if (/driveway paving/i.test(s.title) && t.dataset.sf === 'budget') {
+      state.driveway.costPave = v;
+      document.getElementById('drvCostPave').value = v;
+    }
+    save();
+    // refresh summary bits without collapsing edit
+    renderHome();
+    const li = t.closest('li');
+    if (li && (t.dataset.sf === 'title' || t.dataset.sf === 'month' || t.dataset.sf === 'status' || t.dataset.sf === 'budget' || t.dataset.sf === 'actual')) {
+      const meta = li.querySelector('.meta');
+      const title = li.querySelector('.title');
+      if (title) title.textContent = s.title;
+      if (meta) meta.innerHTML = `${fmtMonth(s.month)} · ${statusPill(s.status)} · budget <span class="money">$${(Number(s.budget)||0).toLocaleString()}</span> · actual <span class="money">$${(Number(s.actual)||0).toLocaleString()}</span>`;
+    }
+  });
+
+  // Drag reorder
+  let dragId = null;
+  document.getElementById('scheduleList').addEventListener('dragstart', e => {
+    const li = e.target.closest('li[data-step]');
+    if (!li) return;
+    dragId = li.dataset.step;
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  document.getElementById('scheduleList').addEventListener('dragover', e => {
+    e.preventDefault();
+    const li = e.target.closest('li[data-step]');
+    if (!li || li.dataset.step === dragId) return;
+    li.style.borderTop = '2px solid var(--accent)';
+  });
+  document.getElementById('scheduleList').addEventListener('dragleave', e => {
+    const li = e.target.closest('li[data-step]');
+    if (li) li.style.borderTop = '';
+  });
+  document.getElementById('scheduleList').addEventListener('drop', e => {
+    e.preventDefault();
+    const li = e.target.closest('li[data-step]');
+    if (!li || !dragId) return;
+    li.style.borderTop = '';
+    const targetId = li.dataset.step;
+    if (targetId === dragId) return;
+    const sorted = [...state.schedule].sort((a,b) => a.order - b.order);
+    const from = sorted.findIndex(s => s.id === dragId);
+    const to = sorted.findIndex(s => s.id === targetId);
+    if (from < 0 || to < 0) return;
+    const [item] = sorted.splice(from, 1);
+    sorted.splice(to, 0, item);
+    sorted.forEach((s, i) => s.order = i);
+    state.schedule = sorted;
+    save(); renderSchedule(); renderHome();
+    dragId = null;
+  });
+
+  function reindexOrders() {
+    [...state.schedule].sort((a,b) => a.order - b.order).forEach((s, i) => s.order = i);
+  }
+
+  // —— IDEAS ——
+  function renderIdeas() {
+    const box = document.getElementById('ideaBoard');
+    if (!state.ideas.length) { box.innerHTML = '<div class="empty">No ideas yet — add one</div>'; return; }
+    const sorted = [...state.ideas].sort((a,b) => (b.created||0) - (a.created||0));
+    box.innerHTML = sorted.map(idea => `
+      <div class="idea">
+        <textarea data-idea="${idea.id}">${esc(idea.text)}</textarea>
+        <div class="row" style="margin-top:6px;justify-content:space-between">
+          <span class="when">${idea.created ? new Date(idea.created).toLocaleString() : ''}</span>
+          <button type="button" class="ghost sm" data-del-idea="${idea.id}">Delete</button>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('addIdea').addEventListener('click', () => {
+    state.ideas.unshift({ id: uid(), text: '', created: Date.now() });
+    save(); renderIdeas();
+  });
+  document.getElementById('ideaBoard').addEventListener('input', e => {
+    const id = e.target.dataset.idea;
+    if (!id) return;
+    const idea = state.ideas.find(x => x.id === id);
+    if (idea) { idea.text = e.target.value; save(); }
+  });
+  document.getElementById('ideaBoard').addEventListener('click', e => {
+    const id = e.target.dataset.delIdea;
+    if (!id) return;
+    state.ideas = state.ideas.filter(x => x.id !== id);
+    save(); renderIdeas();
+  });
+
+  // —— Export / Import / Reset ——
+  document.getElementById('btnExport').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'clarence-ct-build-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  document.getElementById('btnImport').addEventListener('click', () => document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        state = { ...defaults(), ...data, lot: { ...defaults().lot, ...(data.lot||{}) }, driveway: { ...defaults().driveway, ...(data.driveway||{}) } };
+        save(); renderAll();
+        alert('Imported.');
+      } catch (err) {
+        alert('Could not import that JSON.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+  document.getElementById('btnReset').addEventListener('click', () => {
+    if (!confirm('Reset all data to defaults? This clears edits on this device.')) return;
+    state = defaults();
+    save(); renderAll();
+  });
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function escAttr(s) {
+    return esc(s).replace(/"/g, '&quot;');
+  }
+
+  function renderAll() {
+    renderHome();
+    renderPlanNotes();
+    renderLotFields();
+    syncDrivewayInputs();
+    renderSchedule();
+    renderIdeas();
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
